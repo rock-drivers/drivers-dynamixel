@@ -1,0 +1,30 @@
+PROJECT(dynamixel)
+SET(PROJECT_VERSION 1.0)
+
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+INCLUDE(FindPkgConfig)
+
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
+pkg_check_modules(DFKI_TYPES REQUIRED "dfki-types")
+INCLUDE_DIRECTORIES(${DFKI_TYPES_INCLUDE_DIRS})
+LINK_DIRECTORIES(${DFKI_TYPES_LIBRARY_DIRS})
+
+pkg_check_modules(IO REQUIRED "iodrivers_base")
+INCLUDE_DIRECTORIES(${IO_INCLUDE_DIRS})
+LINK_DIRECTORIES(${IO_LIBRARY_DIRS})
+
+ADD_LIBRARY(dynamixel SHARED dynamixel.cc)
+TARGET_LINK_LIBRARIES(dynamixel ${DFKI_TYPES_LIBRARIES} ${IO_LIBRARIES})
+
+ADD_EXECUTABLE(dynamixel_test dynamixel_test.cc)
+TARGET_LINK_LIBRARIES(dynamixel_test dynamixel)
+INSTALL(TARGETS dynamixel  LIBRARY DESTINATION lib)
+INSTALL(FILES dynamixel.hh DESTINATION include)
+
+CONFIGURE_FILE(Doxyfile.in Doxyfile @ONLY)
+ADD_CUSTOM_TARGET(doc doxygen Doxyfile)
+
+CONFIGURE_FILE(dynamixel.pc.in dynamixel.pc @ONLY)
+INSTALL(FILES ${CMAKE_BINARY_DIR}/dynamixel.pc DESTINATION lib/pkgconfig)
+
