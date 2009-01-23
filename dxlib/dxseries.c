@@ -91,7 +91,7 @@ void dxGetRegWriteCommand(DX_UINT8 *command,        // buffer to put the resulti
                           DX_UINT8 *size,           // length of the resulting command string
                           DX_UINT8  id,             // Servo which should be adressed
                           DX_UINT8  startingAdress, // starting adress of write
-                          DX_UINT8 *data,           // data to write
+                          const DX_UINT8 *data,           // data to write
                           DX_UINT8  dataSize)       // length of data to write
 {
   command[0] = 255;                        // start of packet
@@ -155,17 +155,20 @@ void dxGetResetCommand(DX_UINT8 *command,    // buffer to put the resulting comm
 
 //------------------------------------------------------------------------------------------------------
 // returns true if checksum is ok
-DX_BOOL dxIsStatusValid(DX_UINT8 *status)       // buffer containing the status packet
+DX_BOOL dxIsStatusValid(const DX_UINT8 *status)       // buffer containing the status packet
+{
+  return dxGetStatusLength(status)>0;
+}
+
+DX_UINT8 dxGetStatusLength(const DX_UINT8 *status)       // buffer containing the status packet
 {
   DX_UINT8 check = status[2];
   DX_UINT8 high  = status[3] + 3;
   DX_UINT8 i = 3;
   while (i < high)
     check += status[i++];
-  return !(check & status[i]);
+  return !(check & status[i])?high+1:0;
 }
-
-
 
 //------------------------------------------------------------------------------------------------------
 // returns the sender id
@@ -414,7 +417,7 @@ void dxGetMovement(DX_UINT8   *status,      // buffer containing the status pack
 void dxGetWriteMovementCommand(DX_UINT8 *command,        // buffer to put the resulting command string
                                DX_UINT8 *size,           // length of the resulting command string
                                DX_UINT8  id,             // Servo which should be adressed
-                               DxMovement *dxMovement)   // struct which contains data to write
+                               const DxMovement *dxMovement)   // struct which contains data to write
 {
   dxGetWriteCommand(command,size,id,30,(DX_UINT8*)(dxMovement),6);
 }
@@ -426,7 +429,7 @@ void dxGetWriteMovementCommand(DX_UINT8 *command,        // buffer to put the re
 void dxGetRegWriteMovementCommand(DX_UINT8 *command,        // buffer to put the resulting command string
                                   DX_UINT8 *size,           // length of the resulting command string
                                   DX_UINT8  id,             // Servo which should be adressed
-                                  DxMovement *dxMovement)   // struct which contains data to write
+                                  const DxMovement *dxMovement)   // struct which contains data to write
 {
   dxGetRegWriteCommand(command,size,id,30,(DX_UINT8*)(dxMovement),6);
 }

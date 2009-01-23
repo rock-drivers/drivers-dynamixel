@@ -289,7 +289,7 @@ void dxGetRegWriteCommand(DX_UINT8 *command,        // buffer to put the resulti
                           DX_UINT8 *size,           // length of the resulting command string
                           DX_UINT8  id,             // Servo which should be adressed
                           DX_UINT8  startingAdress, // starting adress of write
-                          DX_UINT8 *data,           // data to write
+                          const DX_UINT8 *data,           // data to write
                           DX_UINT8  dataSize);      // length of data to write
 
 // Start the action registered by REG WRITE.
@@ -306,8 +306,11 @@ void dxGetResetCommand(DX_UINT8 *command,    // buffer to put the resulting comm
 //------------------------------------------------------------------------------------------------------
 // status packet parsing
 
+// returns the length of the status package
+DX_UINT8 dxGetStatusLength(const DX_UINT8 *status);
+
 // returns true if checksum is ok
-DX_BOOL dxIsStatusValid(DX_UINT8 *status);       // buffer containing the status packet
+DX_BOOL dxIsStatusValid(const DX_UINT8 *status);       // buffer containing the status packet
 
 // returns the sender id
 DX_UINT8 dxGetStatusID(DX_UINT8 *status);         // buffer containing the status packet
@@ -394,13 +397,13 @@ void dxGetMovement(DX_UINT8   *status,      // buffer containing the status pack
 void dxGetWriteMovementCommand(DX_UINT8 *command,        // buffer to put the resulting command string
                                DX_UINT8 *size,           // length of the resulting command string
                                DX_UINT8  id,             // Servo which should be adressed
-                               DxMovement *dxMovement);  // struct which contains data to write
+                               const DxMovement *dxMovement);  // struct which contains data to write
 
 // RegWrite all movement values in the Control table.
 void dxGetRegWriteMovementCommand(DX_UINT8 *command,        // buffer to put the resulting command string
                                   DX_UINT8 *size,           // length of the resulting command string
                                   DX_UINT8  id,             // Servo which should be adressed
-                                  DxMovement *dxMovement);  // struct which contains data to write
+                                  const DxMovement *dxMovement);  // struct which contains data to write
 
  #endif
 
