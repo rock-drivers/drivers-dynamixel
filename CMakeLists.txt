@@ -20,7 +20,9 @@ ADD_LIBRARY(dynamixel SHARED dynamixel.cc dxlib/dxseries.c)
 TARGET_LINK_LIBRARIES(dynamixel ${DFKI_TYPES_LIBRARIES} ${IO_LIBRARIES})
 
 ADD_EXECUTABLE(dynamixel_test dynamixel_test.cc)
+ADD_EXECUTABLE(dynamixel_scan dynamixel_scan.cc)
 TARGET_LINK_LIBRARIES(dynamixel_test dynamixel)
+TARGET_LINK_LIBRARIES(dynamixel_scan dynamixel)
 INSTALL(TARGETS dynamixel  LIBRARY DESTINATION lib)
 INSTALL(FILES dynamixel.hh DESTINATION include)
 

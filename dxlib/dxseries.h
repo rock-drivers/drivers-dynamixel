@@ -20,6 +20,7 @@
 // types
 #define DX_BOOL   short
 #define DX_UINT8  unsigned char
+#define DX_INT8   char
 #define DX_UINT16 unsigned short
 
 // broadcast adress
@@ -307,10 +308,10 @@ void dxGetResetCommand(DX_UINT8 *command,    // buffer to put the resulting comm
 // status packet parsing
 
 // returns the length of the status package
-DX_UINT8 dxGetStatusLength(const DX_UINT8 *status);
+DX_INT8 dxGetStatusLength(const DX_UINT8 *status, DX_UINT8 size);
 
 // returns true if checksum is ok
-DX_BOOL dxIsStatusValid(const DX_UINT8 *status);       // buffer containing the status packet
+DX_BOOL dxIsStatusValid(const DX_UINT8 *status, DX_UINT8 size);       // buffer containing the status packet
 
 // returns the sender id
 DX_UINT8 dxGetStatusID(DX_UINT8 *status);         // buffer containing the status packet

@@ -155,19 +155,28 @@ void dxGetResetCommand(DX_UINT8 *command,    // buffer to put the resulting comm
 
 //------------------------------------------------------------------------------------------------------
 // returns true if checksum is ok
-DX_BOOL dxIsStatusValid(const DX_UINT8 *status)       // buffer containing the status packet
+DX_BOOL dxIsStatusValid(const DX_UINT8 *status, DX_UINT8 size)       // buffer containing the status packet
 {
-  return dxGetStatusLength(status)>0;
-}
+  return dxGetStatusLength(status, size)>0;
+} 
 
-DX_UINT8 dxGetStatusLength(const DX_UINT8 *status)       // buffer containing the status packet
+DX_INT8 dxGetStatusLength(const DX_UINT8 *status, DX_UINT8 size)       // buffer containing the status packet
 {
+  // check for valid packet
+  if( status[0] != 0xff || status[1] != 0xff ) { 
+      return 0;
+  }
+
   DX_UINT8 check = status[2];
   DX_UINT8 high  = status[3] + 3;
   DX_UINT8 i = 3;
-  while (i < high)
-    check += status[i++];
-  return !(check & status[i])?high+1:0;
+  if( high < size ) {
+      while (i < high)
+          check += status[i++];
+      return !(check & status[i])?high+1:-(high+1); // return negative length if packet has invalid checksum
+  } else {
+      return 0; // packet seems to be incomplete
+  }
 }
 
 //------------------------------------------------------------------------------------------------------
