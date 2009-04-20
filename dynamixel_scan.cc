@@ -12,7 +12,14 @@ int main (int argc, const char** argv){
     printf("Dynamixel test\n");
 
     if (argc<4){
-        printf( "Usage: dynamixel_test <device> <servo_id> <pos> [<end> <step> <delay>]\n");
+        fprintf(stderr, "Usage: dynamixel_test <device> <servo_id> <pos> [<end> <step> <delay>]\n");
+        fprintf(stderr, "  servo_id\n");
+        fprintf(stderr, "  pos is the starting position in tics\n");
+        fprintf(stderr, "  end is the end position in tics\n");
+        fprintf(stderr, "  step is the number of tics between two stops\n");
+        fprintf(stderr, "  delay is the time to wait at each stop, in milliseconds\n");
+        fprintf(stderr, "\n");
+        fprintf(stderr, "The program outputs [timestamp] [values] where the timestamp is in milliseconds\n");
         return 0;
     }
 
