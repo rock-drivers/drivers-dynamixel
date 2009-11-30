@@ -1,0 +1,13 @@
+<package>
+  <description brief="driver for Dynamixel servos">
+      This library offers a driver for Dynamixel servos
+  </description>
+  <author>Jakob Schwendner/jakob.schwendner@dfki.de</author>
+  <copyright>
+      DFKI/robotik@dfki.de
+  </copyright>
+  <license>GPL v3</license>
+
+  <depend package="drivers/iodrivers_base" />
+</package>
+
