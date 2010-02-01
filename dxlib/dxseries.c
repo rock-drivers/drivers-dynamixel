@@ -172,7 +172,8 @@ DX_INT8 dxGetStatusLength(const DX_UINT8 *status, DX_UINT8 size)       // buffer
   DX_UINT8 i = 3;
   if( high < size ) {
       while (i < high)
-          check += status[i++];
+          check += status[i++]; //build checksum
+      //check is the inverted desired checksum of the packet, status[i] the non-inverted calculated checksum
       return !(check & status[i])?high+1:-(high+1); // return negative length if packet has invalid checksum
   } else {
       return 0; // packet seems to be incomplete

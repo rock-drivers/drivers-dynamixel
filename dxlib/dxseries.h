@@ -84,6 +84,28 @@
 #define DX_LOCK                  0x012F
 #define DX_PUNCH                 0x0230
 
+// baud rate
+#define DX_BAUD_1000000               1
+#define DX_BAUD_500000                3
+#define DX_BAUD_400000                4
+#define DX_BAUD_250000                7
+#define DX_BAUD_200000                9
+#define DX_BAUD_115200               16
+#define DX_BAUD_57600                34
+#define DX_BAUD_19200               103
+#define DX_BAUD_9600                207
+
+// status return level
+#define DX_STATUS_RETURN_NO           0
+#define DX_STATUS_RETURN_ONLY_READ    1
+#define DX_STATUS_RETURN_ALL          2
+
+//alarm led, blinks when an error occurred
+//use the error bits to indicate the errors
+
+//alarm shutdown, dynamixel will shut down if an error occurred
+//use the error bits to indicate the errors  
+
 //------------------------------------------------------------------------------------------------------
 // some structs
 
@@ -195,7 +217,7 @@ typedef struct DxComplete_type {
                                          //   powering down.
   DX_UINT16 punch;                        //-- Minimum current being supplied to the motor during an action.
                                          //   The minimum value is 0x20 and the maximum value as 0x3ff.
-} DxComplete;
+} __attribute__((packed)) DxComplete;
 
 
 typedef struct DxInitial_type {
@@ -238,7 +260,7 @@ typedef struct DxInitial_type {
                                          //   maximum value of 0x3ff, it moves at 70RPM.
   DX_UINT16 torqueLimit;                 //-- Current torque limit of the Dynamixel (s. maxTorque).
 
-} DxInitial;
+} __attribute__((packed)) DxInitial;
 
 
 typedef struct DxPresentValues_type {
@@ -250,7 +272,7 @@ typedef struct DxPresentValues_type {
   DX_UINT8  presentVoltage;              //-- The voltage applied to the Dynamixel. The value is 10 times the
                                          //   actual voltage. For example, 10V is read as 100(0x64).
   DX_UINT8  presentTemperature;          //-- Current internal Dynamixel temperature (Degrees Celsius).
-} DxPresentValues;
+} __attribute__((packed)) DxPresentValues;
 
 
 typedef struct DxMovement_type {
@@ -259,7 +281,7 @@ typedef struct DxMovement_type {
   DX_UINT16 movingSpeed;                 //-- The angular speed to move to the Goal Position. If set to the
                                          //   maximum value of 0x3ff, it moves at 70RPM.
   DX_UINT16 torqueLimit;                 //-- Current torque limit of the Dynamixel (s. maxTorque).
-} DxMovement;
+} __attribute__((packed)) DxMovement;
 
 
 //------------------------------------------------------------------------------------------------------

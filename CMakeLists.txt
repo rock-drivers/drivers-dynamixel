@@ -6,21 +6,25 @@ INCLUDE(FindPkgConfig)
 
 INCLUDE_DIRECTORIES(.)
 
+SET(CMAKE_BUILD_TYPE Debug)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
+pkg_check_modules(BASE_TYPES REQUIRED "base-types")
+INCLUDE_DIRECTORIES(${BASE_TYPES_INCLUDE_DIRS})
+LINK_DIRECTORIES(${BASE_TYPES_LIBRARY_DIRS})
 
 pkg_check_modules(IO REQUIRED "iodrivers_base")
 INCLUDE_DIRECTORIES(${IO_INCLUDE_DIRS})
 LINK_DIRECTORIES(${IO_LIBRARY_DIRS})
 
-ADD_LIBRARY(dynamixel SHARED dynamixel.cc dxlib/dxseries.c)
-TARGET_LINK_LIBRARIES(dynamixel ${IO_LIBRARIES})
+ADD_LIBRARY(dynamixel SHARED dynamixel.cpp dxlib/dxseries.c dynamixel_iodriver.cpp)
+TARGET_LINK_LIBRARIES(dynamixel ${DFKI_TYPES_LIBRARIES} ${IO_LIBRARIES})
 
-ADD_EXECUTABLE(dynamixel_test dynamixel_test.cc)
-ADD_EXECUTABLE(dynamixel_scan dynamixel_scan.cc)
-TARGET_LINK_LIBRARIES(dynamixel_test dynamixel)
-TARGET_LINK_LIBRARIES(dynamixel_scan dynamixel)
-INSTALL(TARGETS dynamixel  LIBRARY DESTINATION lib)
-INSTALL(FILES dynamixel.hh DESTINATION include)
+ADD_EXECUTABLE(test test.cpp)
+TARGET_LINK_LIBRARIES(test dynamixel)
+
+INSTALL(TARGETS dynamixel LIBRARY DESTINATION lib)
+INSTALL(FILES dxlib/dxseries.h dynamixel.h dynamixel_iodriver.h DESTINATION include)
 
 CONFIGURE_FILE(Doxyfile.in Doxyfile @ONLY)
 ADD_CUSTOM_TARGET(doc doxygen Doxyfile)
