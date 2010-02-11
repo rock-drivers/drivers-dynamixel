@@ -17,14 +17,14 @@ pkg_check_modules(IO REQUIRED "iodrivers_base")
 INCLUDE_DIRECTORIES(${IO_INCLUDE_DIRS})
 LINK_DIRECTORIES(${IO_LIBRARY_DIRS})
 
-ADD_LIBRARY(dynamixel SHARED dynamixel.cpp dxlib/dxseries.c dynamixel_iodriver.cpp)
+ADD_LIBRARY(dynamixel SHARED dynamixel.cpp dxseries.c dynamixel_iodriver.cpp)
 TARGET_LINK_LIBRARIES(dynamixel ${DFKI_TYPES_LIBRARIES} ${IO_LIBRARIES})
 
 ADD_EXECUTABLE(test test.cpp)
 TARGET_LINK_LIBRARIES(test dynamixel)
 
 INSTALL(TARGETS dynamixel LIBRARY DESTINATION lib)
-INSTALL(FILES dxlib/dxseries.h dynamixel.h dynamixel_iodriver.h DESTINATION include)
+INSTALL(FILES dxseries.h dynamixel.h dynamixel_iodriver.h DESTINATION include)
 
 CONFIGURE_FILE(Doxyfile.in Doxyfile @ONLY)
 ADD_CUSTOM_TARGET(doc doxygen Doxyfile)

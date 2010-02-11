@@ -27,7 +27,7 @@
 #include <dynamixel_iodriver.h>
 
 extern "C" {
-#include <dxlib/dxseries.h>
+#include <dxseries.h>
 }
 
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
