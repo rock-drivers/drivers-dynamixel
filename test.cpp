@@ -14,13 +14,14 @@
 int main (int argc, const char** argv){
     std::cout << "Dynamixel test" << std::endl;
 
-    if (argc<3 || argc>4){
-        std::cout << "Usage: dynamixel_test <device> <servo_id> (optional: pos_degree)" << std::endl;
+    if (argc<3 || argc>5){
+        std::cout << "Usage: dynamixel_test <device> <servo_id> <baudrate> (optional: pos_degree)" << std::endl;
         return 0;
     }
 
     int id = atoi(argv[2]);
-    std::cout << "Testing servo with id " << id << " on device " << argv[1] << std::endl;
+    int baud = atoi(argv[3]);
+    std::cout << "Testing servo with id " << id << " on device " << argv[1] << " and baudrate " << baud << std::endl;
     
     Dynamixel dynamixel_;
     dynamixel_.addServo(id);
@@ -28,8 +29,8 @@ int main (int argc, const char** argv){
 
     struct Dynamixel::Configuration dynamixel_config;
     dynamixel_config.mFilename= (argv[1]);
-    dynamixel_config.mBaudrate = 57600;
-    dynamixel_.setTimeout(1000);
+    dynamixel_config.mBaudrate = baud;
+    dynamixel_.setTimeout(100);
 
     if(!dynamixel_.init(&dynamixel_config))
     {
@@ -47,9 +48,10 @@ int main (int argc, const char** argv){
         std::cout << dynamixel_.getControlTableString() << std::endl; 
     }
 
-    if(argc == 4)
+    if(argc == 5)
     {
-        uint16_t pos_ = (uint16_t)atoi(argv[3]);
+        uint16_t pos_ = (uint16_t)atoi(argv[4]);
+        std::cout << pos_ << std::endl;
         if(!dynamixel_.setGoalPosition(pos_))
         {
             std::cerr << "setGoalPosition" << std::endl;
