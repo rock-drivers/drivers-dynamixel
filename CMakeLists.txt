@@ -20,8 +20,8 @@ LINK_DIRECTORIES(${IO_LIBRARY_DIRS})
 ADD_LIBRARY(dynamixel SHARED dynamixel.cpp dxseries.c dynamixel_iodriver.cpp)
 TARGET_LINK_LIBRARIES(dynamixel ${DFKI_TYPES_LIBRARIES} ${IO_LIBRARIES})
 
-ADD_EXECUTABLE(test test.cpp)
-TARGET_LINK_LIBRARIES(test dynamixel)
+ADD_EXECUTABLE(dynamixel_test dynamixel_test.cpp)
+TARGET_LINK_LIBRARIES(dynamixel_test dynamixel)
 
 INSTALL(TARGETS dynamixel LIBRARY DESTINATION lib)
 INSTALL(FILES dxseries.h dynamixel.h dynamixel_iodriver.h DESTINATION include)
