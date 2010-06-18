@@ -35,7 +35,7 @@ bool Dynamixel::addServo(DX_UINT8 id_)
         {
             std::cout << "Dynamixel::addServo(): servo " << (int)id_ << " already exists" << std::endl;
             return false;
-        } 
+        }
     }
     mServoList.push_back(new Servo(id_));
     return true;
@@ -44,7 +44,7 @@ bool Dynamixel::addServo(DX_UINT8 id_)
 bool Dynamixel::getControlTableEntry(std::string const item_name, uint16_t * const value_)
 {
     if(mpActiveServo == NULL)
-    {   
+    {
         std::cout << "Dynamixel::getControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
         return false;
     }
@@ -54,12 +54,12 @@ bool Dynamixel::getControlTableEntry(std::string const item_name, uint16_t * con
      {
          std::cout << "Dynamixel::getControlTableEntry(): setControlTableEntry: unkown item name" << std::endl;
          return false;
-     }    
+     }
 
      DX_UINT8 command_length_bytes;
-     dxGetReadCommand(mCommandBuffer, 
-         &command_length_bytes, 
-         mActiveServoID, 
+     dxGetReadCommand(mCommandBuffer,
+         &command_length_bytes,
+         mActiveServoID,
          entry_->mAddress,
          entry_->mBytes);
      if(writeCommandReadAnswer(command_length_bytes))
@@ -82,7 +82,7 @@ bool Dynamixel::getControlTableEntry(std::string const item_name, uint16_t * con
 std::string Dynamixel::getControlTableString()
 {
     if(mpActiveServo == NULL)
-    {   
+    {
         std::cout << "Dynamixel::getControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
         return "";
     }
@@ -94,7 +94,7 @@ std::string Dynamixel::getControlTableString()
         //every name string should have a length of NAME_LENGTH
         for(int j=(int)mControlTableEntries[i].mName.length(); j<NAME_LENGTH; j++)
         {
-            stream << ' '; 
+            stream << ' ';
         }
         stream << mpActiveServo->mControlTableValues[i];
         //additional output: step to degree conversion
@@ -104,16 +104,16 @@ std::string Dynamixel::getControlTableString()
              stream << " (" << step2deg(mpActiveServo->mControlTableValues[i]) << " deg)";
         }
         stream << '\n';
-    }   
+    }
     std::string s;
     s = stream.str();
-    return s;                   
+    return s;
 }
 
 bool Dynamixel::getPresentPosition(uint16_t * const pos_)
 {
     if(mpActiveServo == NULL)
-    {   
+    {
         std::cout << "Dynamixel::getControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
         return "";
     }
@@ -121,7 +121,7 @@ bool Dynamixel::getPresentPosition(uint16_t * const pos_)
     dxGetReadCommand(mCommandBuffer, &command_length_bytes, mActiveServoID, 36, 2);
     if(writeCommandReadAnswer(command_length_bytes))
     {
-       
+
         int byte_low = mBuffer[5];
         int byte_high = mBuffer[6];
         *pos_ = (byte_low | (byte_high << 8));
@@ -151,13 +151,13 @@ bool Dynamixel::init(struct Configuration * const config)
 bool Dynamixel::readControlTable()
 {
     if(mpActiveServo == NULL)
-    {   
+    {
         std::cout << "Dynamixel::getControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
         return "";
     }
     DX_UINT8 command_length_bytes;
     dxGetReadCompleteCommand(mCommandBuffer, &command_length_bytes, mActiveServoID);
-    if(writeCommandReadAnswer(command_length_bytes)) //fills the mBuffer
+    if( (writeCommandReadAnswer(command_length_bytes)) && (mActiveServoID != DX_BROADCAST) ) //fills the mBuffer, if talking to one specific servo
     {
         struct DxComplete_type mCompleteControlTable;
         dxGetComplete(mBuffer, &mCompleteControlTable);
@@ -182,7 +182,7 @@ bool Dynamixel::readControlTable()
 bool Dynamixel::setControlTableEntry(std::string item_name, uint16_t const value_)
 {
     if(mpActiveServo == NULL)
-    {   
+    {
         std::cout << "Dynamixel::getControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
         return "";
     }
@@ -193,14 +193,14 @@ bool Dynamixel::setControlTableEntry(std::string item_name, uint16_t const value
     {
         std::cout << "Dynamixel::setControlTableEntry(): unkown item name" << std::endl;
         return false;
-    }    
+    }
 
     DX_UINT8 command_length_bytes;
-    dxGetWriteCommand(mCommandBuffer, 
-        &command_length_bytes, 
-        mActiveServoID, 
-        entry->mAddress, 
-        (DX_UINT8*)&value_, 
+    dxGetWriteCommand(mCommandBuffer,
+        &command_length_bytes,
+        mActiveServoID,
+        entry->mAddress,
+        (DX_UINT8*)&value_,
         entry->mBytes);
     if(writeCommandReadAnswer(command_length_bytes))
     {
@@ -213,7 +213,7 @@ bool Dynamixel::setControlTableEntry(std::string item_name, uint16_t const value
 bool Dynamixel::setGoalPosition(uint16_t const pos_)
 {
     if(mpActiveServo == NULL)
-    {   
+    {
         std::cout << "Dynamixel::getControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
         return "";
     }
@@ -308,6 +308,7 @@ bool Dynamixel::writeCommandReadAnswer(int command_length_bytes)
         //will we get a status packet? broadcast means no
         if(mActiveServoID == DX_BROADCAST)
         {
+            cout << "Dynamixel::writeCommandReadAnswer(): Broadcasting, won't recevice status packet as an answer. can't read controlTable" << endl;
             return true;
         }
 
