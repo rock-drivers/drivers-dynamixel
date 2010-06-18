@@ -9,13 +9,13 @@
 #define DYNAMIXEL_SUCCESS 0
 #define DYNAMIXEL_NO_INIT 1
 #define DYNAMIXEL_NO_TABLE 2
-#define DYNAMIXEL_NO_POSITION 3
+#define DYNAMIXEL_NO_WRITE 3
 
 /**
  * Requests and prints the control table and (optional) moves the servo to the passed position.\n
  * Usage: dynamixel_test <device> <servo_id> (optional: pos).\n
  * \return 0 if success, 1 if the servo could not be initialized, 2 if the control table \n
- * could not be read and 3 if the goal position could not be set.
+ * could not be read and 3 some ControlTable Vlaues could not be written
  */
 int main (int argc, char** argv){
     std::cout << "Dynamixel test" << std::endl;
@@ -104,14 +104,14 @@ int main (int argc, char** argv){
 				{
 					std::cerr << "cannot open device." << std::endl;
 					perror("errno is");
-					return 1;
+					return DYNAMIXEL_NO_INIT;
 				}
 
 				if(!dynamixel_.readControlTable())
 				{
 					std::cerr << "readControlTable" << std::endl;
 					perror("errno is");
-					return 2;
+					return DYNAMIXEL_NO_INIT;
 				} else {
 					std::cout << dynamixel_.getControlTableString() << std::endl;
 				}
@@ -129,14 +129,14 @@ int main (int argc, char** argv){
              case 'p':
 				if (!connected) {
 					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
-					return 1;
+					return DYNAMIXEL_NO_INIT;
 				}
 
 				if(!dynamixel_.setGoalPosition((uint16_t)atoi(optarg)))
 				{
 					std::cerr << "setGoalPosition" << std::endl;
 					perror("errno is");
-					return 3;
+					return DYNAMIXEL_NO_WRITE;
 				} else {
 					uint16_t present_pos_ = 0;
 					do
@@ -150,14 +150,14 @@ int main (int argc, char** argv){
              case 'a':
 				if (!connected) {
 					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
-					return 1;
+					return DYNAMIXEL_NO_INIT;
 				}
 
 				if (!dynamixel_.getControlTableEntry("CCW Angle Limit",&retVal))
 				{
 					std::cerr << "set CW_angle" << std::endl;
 					perror("errno is");
-					return 3;
+					return DYNAMIXEL_NO_WRITE;
 				}
 				if ((uint16_t)atoi(optarg) > retVal)
 					std::cerr << "invalid angle, new left margin is greater than right one..." << std::endl;
@@ -166,7 +166,7 @@ int main (int argc, char** argv){
 				{
 					std::cerr << "set CW_angle" << std::endl;
 					perror("errno is");
-					return 3;
+					return DYNAMIXEL_NO_WRITE;
 				} else {
 					std::cout << "set CW_angle Limit to " << (uint16_t)atoi(optarg) << std::endl;
 				}
@@ -175,14 +175,14 @@ int main (int argc, char** argv){
              case 'A':
 				if (!connected) {
 					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
-					return 1;
+					return DYNAMIXEL_NO_INIT;
 				}
 
 				if (!dynamixel_.getControlTableEntry("CW Angle Limit",&retVal))
 				{
 					std::cerr << "set CCW_angle" << std::endl;
 					perror("errno is");
-					return 3;
+					return DYNAMIXEL_NO_WRITE;
 				}
 				if ((uint16_t)atoi(optarg) < retVal)
 					std::cerr << "invalid angle, new right margin is smaller than left one..." << std::endl;
@@ -191,7 +191,7 @@ int main (int argc, char** argv){
 				{
 					std::cerr << "set CCW_angle" << std::endl;
 					perror("errno is");
-					return 3;
+					return DYNAMIXEL_NO_WRITE;
 				} else {
 					std::cout << "set CCW_angle Limit to " << (uint16_t)atoi(optarg) << std::endl;
 				}
@@ -200,14 +200,14 @@ int main (int argc, char** argv){
              case 'm':
 				if (!connected) {
 					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
-					return 1;
+					return DYNAMIXEL_NO_INIT;
 				}
 
 				if(!dynamixel_.setControlTableEntry("CW Compliance Margin", (uint16_t)atoi(optarg)))
 				{
 					std::cerr << "CW Compliance Margin" << std::endl;
 					perror("errno is");
-					return 3;
+					return DYNAMIXEL_NO_WRITE;
 				} else {
 					std::cout << "set CCW Compliance Margin to " << (uint16_t)atoi(optarg) << std::endl;
 				}
@@ -216,14 +216,14 @@ int main (int argc, char** argv){
              case 'M':
 				if (!connected) {
 					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
-					return 1;
+					return DYNAMIXEL_NO_INIT;
 				}
 
 				if(!dynamixel_.setControlTableEntry("CW Compliance Margin", (uint16_t)atoi(optarg)))
 				{
 					std::cerr << "set CCW Compliance Margin" << std::endl;
 					perror("errno is");
-					return 3;
+					return DYNAMIXEL_NO_WRITE;
 				} else {
 					std::cout << "set CCW Compliance Margin to " << (uint16_t)atoi(optarg) << std::endl;
 				}
@@ -232,14 +232,14 @@ int main (int argc, char** argv){
              case 's':
 				if (!connected) {
 					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
-					return 1;
+					return DYNAMIXEL_NO_INIT;
 				}
 
 				if(!dynamixel_.setControlTableEntry("CW Compliance Slope", (uint16_t)atoi(optarg)))
 				{
 					std::cerr << "CW Compliance Slope" << std::endl;
 					perror("errno is");
-					return 3;
+					return DYNAMIXEL_NO_WRITE;
 				} else {
 					std::cout << "set CCW Compliance Slope to " << (uint16_t)atoi(optarg) << std::endl;
 				}
@@ -248,14 +248,14 @@ int main (int argc, char** argv){
              case 'S':
 				if (!connected) {
 					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
-					return 1;
+					return DYNAMIXEL_NO_INIT;
 				}
 
 				if(!dynamixel_.setControlTableEntry("CW Compliance Slope", (uint16_t)atoi(optarg)))
 				{
 					std::cerr << "set CCW Compliance Slope" << std::endl;
 					perror("errno is");
-					return 3;
+					return DYNAMIXEL_NO_WRITE;
 				} else {
 					std::cout << "set CCW Compliance Slope to " << (uint16_t)atoi(optarg) << std::endl;
 				}
@@ -264,14 +264,14 @@ int main (int argc, char** argv){
              case 'u':
 				if (!connected) {
 					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
-					return 1;
+					return DYNAMIXEL_NO_INIT;
 				}
 
 				if(!dynamixel_.setControlTableEntry("Punch", (uint16_t)atoi(optarg)))
 				{
 					std::cerr << "set punch" << std::endl;
 					perror("errno is");
-					return 3;
+					return DYNAMIXEL_NO_WRITE;
 				} else {
 					std::cout << "set punch to " <<  (uint16_t)atoi(optarg) << std::endl;
 				}
@@ -280,14 +280,14 @@ int main (int argc, char** argv){
              case 'e':
 				if (!connected) {
 					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
-					return 1;
+					return DYNAMIXEL_NO_INIT;
 				}
 
 				if(!dynamixel_.setControlTableEntry("Moving Speed", (uint16_t)atoi(optarg)))
 				{
 					std::cerr << "set Moving Speed" << std::endl;
 					perror("errno is");
-					return 3;
+					return DYNAMIXEL_NO_WRITE;
 				} else {
 					std::cout << "set Moving Speed to " <<  (uint16_t)atoi(optarg) << std::endl;
 				}
@@ -296,14 +296,14 @@ int main (int argc, char** argv){
              case 't':
 				if (!connected) {
 					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
-					return 1;
+					return DYNAMIXEL_NO_INIT;
 				}
 
 				if(!dynamixel_.setControlTableEntry("Torque Limit", (uint16_t)atoi(optarg)))
 				{
 					std::cerr << "set Torque Limit" << std::endl;
 					perror("errno is");
-					return 3;
+					return DYNAMIXEL_NO_WRITE;
 				} else {
 					std::cout << "set Torque Limit to " <<  (uint16_t)atoi(optarg) << std::endl;
 				}
@@ -330,5 +330,5 @@ int main (int argc, char** argv){
              std::cout << argv[optind++] <<std::endl;
          }
 
-    return 0;
+    return DYNAMIXEL_SUCCESS;
 }
