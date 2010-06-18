@@ -52,7 +52,7 @@ bool Dynamixel::getControlTableEntry(std::string const item_name, uint16_t * con
      struct ControlTableEntry* entry_ = mMapStringCTEntry[item_name];
      if(entry_ == NULL)
      {
-         std::cout << "Dynamixel::getControlTableEntry(): setControlTableEntry: unkown item name" << std::endl;
+         std::cout << "Dynamixel::getControlTableEntry(): getControlTableEntry: unkown item name" << std::endl;
          return false;
      }
 
@@ -83,7 +83,7 @@ std::string Dynamixel::getControlTableString()
 {
     if(mpActiveServo == NULL)
     {
-        std::cout << "Dynamixel::getControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
+        std::cout << "Dynamixel::getControlTableString(): no active servo, use setServoActive() first" << std::endl;
         return "";
     }
     std::stringstream stream;
@@ -117,7 +117,7 @@ bool Dynamixel::getPresentPosition(uint16_t * const pos_)
 {
     if(mpActiveServo == NULL)
     {
-        std::cout << "Dynamixel::getControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
+        std::cout << "Dynamixel::getPresentPosition(): no active servo, use setServoActive() first" << std::endl;
         return "";
     }
     DX_UINT8 command_length_bytes;
@@ -155,7 +155,7 @@ bool Dynamixel::readControlTable()
 {
     if(mpActiveServo == NULL)
     {
-        std::cout << "Dynamixel::getControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
+        std::cout << "Dynamixel::readControlTable(): no active servo, use setServoActive() first" << std::endl;
         return "";
     }
     DX_UINT8 command_length_bytes;
@@ -186,7 +186,7 @@ bool Dynamixel::setControlTableEntry(std::string item_name, uint16_t const value
 {
     if(mpActiveServo == NULL)
     {
-        std::cout << "Dynamixel::getControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
+        std::cout << "Dynamixel::setControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
         return "";
     }
     std::cout << "Dynamixel::setControlTableEntry(): servo " << (int)mActiveServoID << ": " << item_name << " -> " << value_ << std::endl;
@@ -217,7 +217,7 @@ bool Dynamixel::setGoalPosition(uint16_t const pos_)
 {
     if(mpActiveServo == NULL)
     {
-        std::cout << "Dynamixel::getControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
+        std::cout << "Dynamixel::setGoalPosition(): no active servo, use setServoActive() first" << std::endl;
         return "";
     }
 
