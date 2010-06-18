@@ -54,12 +54,13 @@ int main (int argc, char** argv){
                {"speed",     required_argument, 0, 'e'},
                {"torque",    required_argument, 0, 't'},
                {"position",  required_argument, 0, 'p'},
+               {"wait",      required_argument, 0, 'w'},
                {0, 0, 0, 0}
              };
            /* getopt_long stores the option index here. */
            int option_index = 0;
 
-           c = getopt_long_only (argc, argv, "i:b:o:ca:A:m:M:s:S:u:e:t:p:", long_options, &option_index);
+           c = getopt_long_only (argc, argv, "i:b:o:ca:A:m:M:s:S:u:e:t:p:w:", long_options, &option_index);
 
            /* Detect the end of the options. */
            if (c == -1)
@@ -308,6 +309,13 @@ int main (int argc, char** argv){
 					std::cout << "set Torque Limit to " <<  (uint16_t)atoi(optarg) << std::endl;
 				}
                break;
+
+             case 'w':
+				std::cout << "waiting for " << atoi(optarg) << " ms..." std::endl;
+				usleep( 1000*atoi(optarg) );
+				std::cout << " ... done" << std::endl;
+               break;
+
              case '?':
 
 				std::cout << "connect has to be done before any move-commands are executed!" << std::endl;
