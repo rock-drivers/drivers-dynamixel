@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include <iostream>
+#include <getopt.h>
 
 #include "dynamixel.h"
 
@@ -11,67 +12,150 @@
  * \return 0 if success, 1 if the servo could not be initialized, 2 if the control table \n
  * could not be read and 3 if the goal position could not be set.
  */
-int main (int argc, const char** argv){
+int main (int argc, char** argv){
     std::cout << "Dynamixel test" << std::endl;
 
-    if (argc<3 || argc>5){
-        std::cout << "Usage: dynamixel_test <device> <servo_id> <baudrate> (optional: pos_degree)" << std::endl;
-        return 0;
-    }
-
-    int id = atoi(argv[2]);
-    int baud = atoi(argv[3]);
-    std::cout << "Testing servo with id " << id << " on device " << argv[1] << " and baudrate " << baud << std::endl;
-
+	// sensible default-values
+    int id = 1;
+    int baud = 57600;
+    uint16_t position = 512;
+    std::string portname("/dev/ttyUSB0");
     Dynamixel dynamixel_;
-    dynamixel_.addServo(id);
-    dynamixel_.setServoActive(id);
-
     struct Dynamixel::Configuration dynamixel_config;
-    dynamixel_config.mFilename= (argv[1]);
-    dynamixel_config.mBaudrate = baud;
-    dynamixel_.setTimeout(100);
+	int idx = 0;
 
-    if(!dynamixel_.init(&dynamixel_config))
-    {
-        std::cerr << "cannot open device." << std::endl;
-        perror("errno is");
-        return 1;
-    }
+//-------------------
+// parsing of cmdline-options
+//-------------------
+       int c;
+       while (1)
+         {
+           static struct option long_options[] =
+             {
+               /* These options set a flag. */
+               {"help",      no_argument, 0, '?'},
+               {"id",        required_argument, 0, 'i'},
+               {"baud",      required_argument, 0, 'b'},
+               {"port",      required_argument, 0, 'o'},
+               {"connect",   no_argument,       0, 'c'},
+//               {"CW_angle",  required_argument, 0, 'a'},
+//               {"CCW_angle", required_argument, 0, 'A'},
+//               {"CW_margin", required_argument, 0, 'm'},
+//               {"CCW_margin",required_argument, 0, 'M'},
+//               {"CW_slope",  required_argument, 0, 's'},
+//               {"CCW_slope", required_argument, 0, 'S'},
+               {"position",  required_argument, 0, 'p'},
+               {0, 0, 0, 0}
+             };
+           /* getopt_long stores the option index here. */
+           int option_index = 0;
 
-    if(!dynamixel_.readControlTable())
-    {
-        std::cerr << "readControlTable" << std::endl;
-        perror("errno is");
-        return 2;
-    } else {
-        std::cout << dynamixel_.getControlTableString() << std::endl;
-    }
+           c = getopt_long_only (argc, argv, "i:b:o:c:p:", long_options, &option_index);
 
-	uint16_t retVal;
-	dynamixel_.getControlTableEntry("Status Return Level", &retVal);
-	if( retVal != 2 ) {
-		std::cout << "I have to set Status Return Level to \"always respond\", so I can work with this servo like i'm supposed to do" << std::endl;
-		dynamixel_.setControlTableEntry("Status Return Level", 2);
-	}
+           /* Detect the end of the options. */
+           if (c == -1)
+             break;
 
-    if(argc == 5)
-    {
-        uint16_t pos_ = (uint16_t)atoi(argv[4]);
-        std::cout << pos_ << std::endl;
-        if(!dynamixel_.setGoalPosition(pos_))
-        {
-            std::cerr << "setGoalPosition" << std::endl;
-            perror("errno is");
-            return 3;
-        } else {
-            uint16_t present_pos_ = 0;
-            do
-            {
-                dynamixel_.getPresentPosition(&present_pos_);
-                std::cout << "present position is " <<  present_pos_ << std::endl;
-            } while(present_pos_ < pos_-3 || present_pos_ > pos_+3);
-        }
-    }
+           switch (c)
+             {
+             case 0:
+               /* If this option set a flag, do nothing else now. */
+               if (long_options[option_index].flag != 0)
+                 break;
+               printf ("option %s", long_options[option_index].name);
+               if (optarg)
+                 printf (" with arg %s", optarg);
+               printf ("\n");
+               break;
+
+             case 'i':
+				id = atoi(optarg);
+				std::cout << "will talk to servo with id " << id << std::endl;
+               break;
+
+             case 'b':
+				baud = atoi(optarg);
+				std::cout << "will use baudrate of " << baud << std::endl;
+               break;
+             case 'o':
+				portname = optarg;
+				std::cout << "will use serial port " << portname << std::endl;
+               break;
+             case 'c':
+				std::cout << "Testing servo with id " << id << " on device " << argv[1] << " and baudrate " << baud << std::endl;
+
+				dynamixel_.addServo(id);
+				dynamixel_.setServoActive(id);
+
+				dynamixel_config.mFilename = portname.c_str();
+				dynamixel_config.mBaudrate = baud;
+				dynamixel_.setTimeout(100);
+
+				if(!dynamixel_.init(&dynamixel_config))
+				{
+					std::cerr << "cannot open device." << std::endl;
+					perror("errno is");
+					return 1;
+				}
+
+				if(!dynamixel_.readControlTable())
+				{
+					std::cerr << "readControlTable" << std::endl;
+					perror("errno is");
+					return 2;
+				} else {
+					std::cout << dynamixel_.getControlTableString() << std::endl;
+				}
+
+				uint16_t retVal;
+				dynamixel_.getControlTableEntry("Status Return Level", &retVal);
+				if( retVal != 2 ) {
+					std::cout << "I have to set Status Return Level to \"always respond\", so I can work with this servo like i'm supposed to do" << std::endl;
+					dynamixel_.setControlTableEntry("Status Return Level", 2);
+				}
+
+               break;
+
+             case 'p':
+				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+
+				position = (uint16_t)atoi(optarg);
+				std::cout << position << std::endl;
+				if(!dynamixel_.setGoalPosition(position))
+				{
+					std::cerr << "setGoalPosition" << std::endl;
+					perror("errno is");
+					return 3;
+				} else {
+					uint16_t present_pos_ = 0;
+					do
+					{
+						dynamixel_.getPresentPosition(&present_pos_);
+						std::cout << "present position is " <<  present_pos_ << std::endl;
+					} while(present_pos_ < position-3 || present_pos_ > position+3);
+				}
+               break;
+
+             case '?':
+
+				std::cout << "valid options:" << std::endl;
+				while (long_options[idx].name != 0){
+					std::cout << "\t"<< long_options[idx++].name << std::endl;
+				}
+
+               break;
+
+             default:
+               abort ();
+             }
+         }
+
+       if (optind < argc)
+         {
+           std::cout << "non-option ARGV-elements: " << std::endl;
+           while (optind < argc)
+             std::cout << argv[optind++] <<std::endl;
+         }
+
     return 0;
 }
