@@ -22,7 +22,7 @@ int main (int argc, const char** argv){
     int id = atoi(argv[2]);
     int baud = atoi(argv[3]);
     std::cout << "Testing servo with id " << id << " on device " << argv[1] << " and baudrate " << baud << std::endl;
-    
+
     Dynamixel dynamixel_;
     dynamixel_.addServo(id);
     dynamixel_.setServoActive(id);
@@ -45,8 +45,15 @@ int main (int argc, const char** argv){
         perror("errno is");
         return 2;
     } else {
-        std::cout << dynamixel_.getControlTableString() << std::endl; 
+        std::cout << dynamixel_.getControlTableString() << std::endl;
     }
+
+	uint16_t retVal;
+	dynamixel_.getControlTableEntry("Status Return Level", &retVal);
+	if( retVal != 2 ) {
+		std::cout << "I have to set Status Return Level to \"always respond\", so I can work with this servo like i'm supposed to do" << std::endl;
+		dynamixel_.setControlTableEntry("Status Return Level", 2);
+	}
 
     if(argc == 5)
     {
@@ -62,7 +69,7 @@ int main (int argc, const char** argv){
             do
             {
                 dynamixel_.getPresentPosition(&present_pos_);
-                std::cout << "present position is " <<  present_pos_ << std::endl; 
+                std::cout << "present position is " <<  present_pos_ << std::endl;
             } while(present_pos_ < pos_-3 || present_pos_ > pos_+3);
         }
     }
