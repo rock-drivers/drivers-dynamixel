@@ -6,6 +6,11 @@
 
 #include "dynamixel.h"
 
+#define DYNAMIXEL_SUCCESS 0
+#define DYNAMIXEL_NO_INIT 1
+#define DYNAMIXEL_NO_TABLE 2
+#define DYNAMIXEL_NO_POSITION 3
+
 /**
  * Requests and prints the control table and (optional) moves the servo to the passed position.\n
  * Usage: dynamixel_test <device> <servo_id> (optional: pos).\n
@@ -23,6 +28,7 @@ int main (int argc, char** argv){
     struct Dynamixel::Configuration dynamixel_config;
 	int idx = 0;
 	uint16_t retVal;
+	bool connected = false;
 
 //-------------------
 // parsing of cmdline-options
@@ -85,7 +91,7 @@ int main (int argc, char** argv){
 				std::cout << "will use serial port " << portname << std::endl;
                break;
              case 'c':
-				std::cout << "Testing servo with id " << id << " on device " << argv[1] << " and baudrate " << baud << std::endl;
+				std::cout << "Connecting to servo with id " << id << " on device " << portname << " and baudrate " << baud << std::endl;
 
 				dynamixel_.addServo(id);
 				dynamixel_.setServoActive(id);
@@ -116,10 +122,15 @@ int main (int argc, char** argv){
 					dynamixel_.setControlTableEntry("Status Return Level", 2);
 				}
 
+				connected = true;
+
                break;
 
              case 'p':
-				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+				if (!connected) {
+					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
+					return 1;
+				}
 
 				if(!dynamixel_.setGoalPosition((uint16_t)atoi(optarg)))
 				{
@@ -137,7 +148,11 @@ int main (int argc, char** argv){
                break;
 
              case 'a':
-				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+				if (!connected) {
+					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
+					return 1;
+				}
+
 				if (!dynamixel_.getControlTableEntry("CCW Angle Limit",&retVal))
 				{
 					std::cerr << "set CW_angle" << std::endl;
@@ -158,7 +173,11 @@ int main (int argc, char** argv){
                break;
 
              case 'A':
-				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+				if (!connected) {
+					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
+					return 1;
+				}
+
 				if (!dynamixel_.getControlTableEntry("CW Angle Limit",&retVal))
 				{
 					std::cerr << "set CCW_angle" << std::endl;
@@ -179,7 +198,10 @@ int main (int argc, char** argv){
                break;
 
              case 'm':
-				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+				if (!connected) {
+					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
+					return 1;
+				}
 
 				if(!dynamixel_.setControlTableEntry("CW Compliance Margin", (uint16_t)atoi(optarg)))
 				{
@@ -192,7 +214,10 @@ int main (int argc, char** argv){
                break;
 
              case 'M':
-				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+				if (!connected) {
+					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
+					return 1;
+				}
 
 				if(!dynamixel_.setControlTableEntry("CW Compliance Margin", (uint16_t)atoi(optarg)))
 				{
@@ -205,7 +230,10 @@ int main (int argc, char** argv){
                break;
 
              case 's':
-				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+				if (!connected) {
+					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
+					return 1;
+				}
 
 				if(!dynamixel_.setControlTableEntry("CW Compliance Slope", (uint16_t)atoi(optarg)))
 				{
@@ -218,7 +246,10 @@ int main (int argc, char** argv){
                break;
 
              case 'S':
-				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+				if (!connected) {
+					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
+					return 1;
+				}
 
 				if(!dynamixel_.setControlTableEntry("CW Compliance Slope", (uint16_t)atoi(optarg)))
 				{
@@ -231,7 +262,10 @@ int main (int argc, char** argv){
                break;
 
              case 'u':
-				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+				if (!connected) {
+					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
+					return 1;
+				}
 
 				if(!dynamixel_.setControlTableEntry("Punch", (uint16_t)atoi(optarg)))
 				{
@@ -244,7 +278,10 @@ int main (int argc, char** argv){
                break;
 
              case 'e':
-				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+				if (!connected) {
+					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
+					return 1;
+				}
 
 				if(!dynamixel_.setControlTableEntry("Moving Speed", (uint16_t)atoi(optarg)))
 				{
@@ -257,7 +294,10 @@ int main (int argc, char** argv){
                break;
 
              case 't':
-				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+				if (!connected) {
+					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
+					return 1;
+				}
 
 				if(!dynamixel_.setControlTableEntry("Torque Limit", (uint16_t)atoi(optarg)))
 				{
