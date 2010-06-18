@@ -90,7 +90,10 @@ std::string Dynamixel::getControlTableString()
     const int NAME_LENGTH = 30;
     for(int i=0; i<cControlTableEntriesNumber; i++)
     {
-        stream << mControlTableEntries[i].mName;
+        if (i<10)
+			stream << " ";
+        stream << i;
+        stream << "  " << mControlTableEntries[i].mName;
         //every name string should have a length of NAME_LENGTH
         for(int j=(int)mControlTableEntries[i].mName.length(); j<NAME_LENGTH; j++)
         {
