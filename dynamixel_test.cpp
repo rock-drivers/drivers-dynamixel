@@ -18,11 +18,11 @@ int main (int argc, char** argv){
 	// sensible default-values
     int id = 1;
     int baud = 57600;
-    uint16_t position = 512;
     std::string portname("/dev/ttyUSB0");
     Dynamixel dynamixel_;
     struct Dynamixel::Configuration dynamixel_config;
 	int idx = 0;
+	uint16_t retVal;
 
 //-------------------
 // parsing of cmdline-options
@@ -38,19 +38,22 @@ int main (int argc, char** argv){
                {"baud",      required_argument, 0, 'b'},
                {"port",      required_argument, 0, 'o'},
                {"connect",   no_argument,       0, 'c'},
-//               {"CW_angle",  required_argument, 0, 'a'},
-//               {"CCW_angle", required_argument, 0, 'A'},
-//               {"CW_margin", required_argument, 0, 'm'},
-//               {"CCW_margin",required_argument, 0, 'M'},
-//               {"CW_slope",  required_argument, 0, 's'},
-//               {"CCW_slope", required_argument, 0, 'S'},
+               {"CW_angle",  required_argument, 0, 'a'},
+               {"CCW_angle", required_argument, 0, 'A'},
+               {"CW_margin", required_argument, 0, 'm'},
+               {"CCW_margin",required_argument, 0, 'M'},
+               {"CW_slope",  required_argument, 0, 's'},
+               {"CCW_slope", required_argument, 0, 'S'},
+               {"punch",     required_argument, 0, 'u'},
+               {"speed",     required_argument, 0, 'e'},
+               {"torque",    required_argument, 0, 't'},
                {"position",  required_argument, 0, 'p'},
                {0, 0, 0, 0}
              };
            /* getopt_long stores the option index here. */
            int option_index = 0;
 
-           c = getopt_long_only (argc, argv, "i:b:o:c:p:", long_options, &option_index);
+           c = getopt_long_only (argc, argv, "i:b:o:ca:A:m:M:s:S:u:e:t:p:", long_options, &option_index);
 
            /* Detect the end of the options. */
            if (c == -1)
@@ -107,7 +110,6 @@ int main (int argc, char** argv){
 					std::cout << dynamixel_.getControlTableString() << std::endl;
 				}
 
-				uint16_t retVal;
 				dynamixel_.getControlTableEntry("Status Return Level", &retVal);
 				if( retVal != 2 ) {
 					std::cout << "I have to set Status Return Level to \"always respond\", so I can work with this servo like i'm supposed to do" << std::endl;
@@ -119,9 +121,7 @@ int main (int argc, char** argv){
              case 'p':
 				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
 
-				position = (uint16_t)atoi(optarg);
-				std::cout << position << std::endl;
-				if(!dynamixel_.setGoalPosition(position))
+				if(!dynamixel_.setGoalPosition((uint16_t)atoi(optarg)))
 				{
 					std::cerr << "setGoalPosition" << std::endl;
 					perror("errno is");
@@ -132,12 +132,145 @@ int main (int argc, char** argv){
 					{
 						dynamixel_.getPresentPosition(&present_pos_);
 						std::cout << "present position is " <<  present_pos_ << std::endl;
-					} while(present_pos_ < position-3 || present_pos_ > position+3);
+					} while(present_pos_ < (uint16_t)atoi(optarg)-3 || present_pos_ > (uint16_t)atoi(optarg)+3);
 				}
                break;
 
+             case 'a':
+				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+				if (!dynamixel_.getControlTableEntry("CCW Angle Limit",&retVal))
+				{
+					std::cerr << "set CW_angle" << std::endl;
+					perror("errno is");
+					return 3;
+				}
+				if ((uint16_t)atoi(optarg) > retVal)
+					std::cerr << "invalid angle, new left margin is greater than right one..." << std::endl;
+
+				if(!dynamixel_.setControlTableEntry("CW Angle Limit", (uint16_t)atoi(optarg)))
+				{
+					std::cerr << "set CW_angle" << std::endl;
+					perror("errno is");
+					return 3;
+				} else {
+					std::cout << "set CW_angle Limit to " << (uint16_t)atoi(optarg) << std::endl;
+				}
+               break;
+
+             case 'A':
+				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+				if (!dynamixel_.getControlTableEntry("CW Angle Limit",&retVal))
+				{
+					std::cerr << "set CCW_angle" << std::endl;
+					perror("errno is");
+					return 3;
+				}
+				if ((uint16_t)atoi(optarg) < retVal)
+					std::cerr << "invalid angle, new right margin is smaller than left one..." << std::endl;
+
+				if(!dynamixel_.setControlTableEntry("CCW Angle Limit", (uint16_t)atoi(optarg)))
+				{
+					std::cerr << "set CCW_angle" << std::endl;
+					perror("errno is");
+					return 3;
+				} else {
+					std::cout << "set CCW_angle Limit to " << (uint16_t)atoi(optarg) << std::endl;
+				}
+               break;
+
+             case 'm':
+				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+
+				if(!dynamixel_.setControlTableEntry("CW Compliance Margin", (uint16_t)atoi(optarg)))
+				{
+					std::cerr << "CW Compliance Margin" << std::endl;
+					perror("errno is");
+					return 3;
+				} else {
+					std::cout << "set CCW Compliance Margin to " << (uint16_t)atoi(optarg) << std::endl;
+				}
+               break;
+
+             case 'M':
+				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+
+				if(!dynamixel_.setControlTableEntry("CW Compliance Margin", (uint16_t)atoi(optarg)))
+				{
+					std::cerr << "set CCW Compliance Margin" << std::endl;
+					perror("errno is");
+					return 3;
+				} else {
+					std::cout << "set CCW Compliance Margin to " << (uint16_t)atoi(optarg) << std::endl;
+				}
+               break;
+
+             case 's':
+				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+
+				if(!dynamixel_.setControlTableEntry("CW Compliance Slope", (uint16_t)atoi(optarg)))
+				{
+					std::cerr << "CW Compliance Slope" << std::endl;
+					perror("errno is");
+					return 3;
+				} else {
+					std::cout << "set CCW Compliance Slope to " << (uint16_t)atoi(optarg) << std::endl;
+				}
+               break;
+
+             case 'S':
+				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+
+				if(!dynamixel_.setControlTableEntry("CW Compliance Slope", (uint16_t)atoi(optarg)))
+				{
+					std::cerr << "set CCW Compliance Slope" << std::endl;
+					perror("errno is");
+					return 3;
+				} else {
+					std::cout << "set CCW Compliance Slope to " << (uint16_t)atoi(optarg) << std::endl;
+				}
+               break;
+
+             case 'u':
+				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+
+				if(!dynamixel_.setControlTableEntry("Punch", (uint16_t)atoi(optarg)))
+				{
+					std::cerr << "set punch" << std::endl;
+					perror("errno is");
+					return 3;
+				} else {
+					std::cout << "set punch to " <<  (uint16_t)atoi(optarg) << std::endl;
+				}
+               break;
+
+             case 'e':
+				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+
+				if(!dynamixel_.setControlTableEntry("Moving Speed", (uint16_t)atoi(optarg)))
+				{
+					std::cerr << "set Moving Speed" << std::endl;
+					perror("errno is");
+					return 3;
+				} else {
+					std::cout << "set Moving Speed to " <<  (uint16_t)atoi(optarg) << std::endl;
+				}
+               break;
+
+             case 't':
+				//TODO: implement some kind of test, if connect was done. to we can give better error messages here
+
+				if(!dynamixel_.setControlTableEntry("Torque Limit", (uint16_t)atoi(optarg)))
+				{
+					std::cerr << "set Torque Limit" << std::endl;
+					perror("errno is");
+					return 3;
+				} else {
+					std::cout << "set Torque Limit to " <<  (uint16_t)atoi(optarg) << std::endl;
+				}
+               break;
              case '?':
 
+				std::cout << "connect has to be done before any move-commands are executed!" << std::endl;
 				std::cout << "valid options:" << std::endl;
 				while (long_options[idx].name != 0){
 					std::cout << "\t"<< long_options[idx++].name << std::endl;
