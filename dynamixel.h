@@ -171,6 +171,15 @@ class Dynamixel
 
     bool setGoalPositionDegree(float const pos_deg);
 
+    void clear()
+    {
+        return mpDynamixelIODriver->clear();
+    }
+    int getFileDescriptor() const
+    {
+        return mpDynamixelIODriver->getFileDescriptor();
+    }
+
     /**
      * Serial read and write timeout, default 1000.
      */
