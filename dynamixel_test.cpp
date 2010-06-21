@@ -13,7 +13,7 @@
 
 /**
  * Requests and prints the control table and (optional) moves the servo to the passed position.\n
- * Usage: dynamixel_test <device> <servo_id> (optional: pos).\n
+ * Usage: ./dynamixel_test -port /dev/ttyUSB0 -id 1 -baud 115200 -connect -p 200 -w 100 -p 850 \n
  * \return 0 if success, 1 if the servo could not be initialized, 2 if the control table \n
  * could not be read and 3 some ControlTable Vlaues could not be written
  */
