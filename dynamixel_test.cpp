@@ -51,16 +51,18 @@ int main (int argc, char** argv){
                {"CW_slope",  required_argument, 0, 's'},
                {"CCW_slope", required_argument, 0, 'S'},
                {"punch",     required_argument, 0, 'u'},
-               {"speed",     required_argument, 0, 'e'},
-               {"torque",    required_argument, 0, 't'},
+               {"max_speed", required_argument, 0, 'e'},
+               {"max_torque",required_argument, 0, 't'},
                {"position",  required_argument, 0, 'p'},
+               {"enable",    no_argument, 0, 'E'},
+               {"disable",   no_argument, 0, 'D'},
                {"wait",      required_argument, 0, 'w'},
                {0, 0, 0, 0}
              };
            /* getopt_long stores the option index here. */
            int option_index = 0;
 
-           c = getopt_long_only (argc, argv, "i:b:o:ca:A:m:M:s:S:u:e:t:p:w:", long_options, &option_index);
+           c = getopt_long_only (argc, argv, "i:b:o:ca:A:m:M:s:S:u:e:t:p:EDw:", long_options, &option_index);
 
            /* Detect the end of the options. */
            if (c == -1)
@@ -310,8 +312,40 @@ int main (int argc, char** argv){
 				}
                break;
 
+             case 'E':
+				if (!connected) {
+					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
+					return DYNAMIXEL_NO_INIT;
+				}
+
+				if(!dynamixel_.setControlTableEntry("Torque Enable", 1))
+				{
+					std::cerr << "enable torque" << std::endl;
+					perror("errno is");
+					return DYNAMIXEL_NO_WRITE;
+				} else {
+					std::cout << "enabled torque" << std::endl;
+				}
+               break;
+
+             case 'D':
+				if (!connected) {
+					std::cerr << "please connect first, using \"-connect\" in commandline" << std::endl;
+					return DYNAMIXEL_NO_INIT;
+				}
+
+				if(!dynamixel_.setControlTableEntry("Torque Enable", 0))
+				{
+					std::cerr << "disable torque" << std::endl;
+					perror("errno is");
+					return DYNAMIXEL_NO_WRITE;
+				} else {
+					std::cout << "disabled torque" << std::endl;
+				}
+               break;
+
              case 'w':
-				std::cout << "waiting for " << atoi(optarg) << " ms..." std::endl;
+				std::cout << "waiting for " << atoi(optarg) << " ms..." << std::endl;
 				usleep( 1000*atoi(optarg) );
 				std::cout << " ... done" << std::endl;
                break;
