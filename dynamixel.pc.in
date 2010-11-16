@@ -6,6 +6,7 @@ includedir=${prefix}/include
 Name: dynamixel
 Description: Driver for the Dynamixel DX series of Servos 
 Version: @PROJECT_VERSION@
+Requires: iodrivers_base
 Libs: -L${libdir} -ldynamixel
 Cflags: -I${includedir}
 
