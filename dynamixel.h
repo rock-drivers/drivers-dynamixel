@@ -189,6 +189,15 @@ class Dynamixel
     }
 
     Servo* setServoActive(DX_UINT8 id_);
+
+    /**
+     * Allows to request a copy of the control table entry.
+     * \param name Name of the control table entry.
+     * \param entry Will be set to the requested control table structure.
+     * \return false if the control name is unknown.
+     */
+    bool getControlTableEntry(std::string const name, struct ControlTableEntry& entry);
+
  private:
     //MEMBER VARIABLES
     DX_UINT8 mCommandBuffer[cCommandBufferSize];

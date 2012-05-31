@@ -2,8 +2,10 @@
 
 #include "dynamixel_iodriver.h"
 
+#include "base/logging.h"
+
 /////////////////////////////// PUBLIC ///////////////////////////////////////
-DynamixelIODriver::DynamixelIODriver() : IODriver(cMaxPacketSize)
+DynamixelIODriver::DynamixelIODriver() : iodrivers_base::Driver(cMaxPacketSize)
 {
     mTimeout = cDefaultTimeout;
     mBaudrate = -1;
@@ -19,13 +21,16 @@ DynamixelIODriver::~DynamixelIODriver()
 
 bool DynamixelIODriver::close()
 {
-    IODriver::close();
+    iodrivers_base::Driver::close();
     return true;
 }
 
 bool DynamixelIODriver::open(std::string const& filename_, int baudrate_) {
-    if (!IODriver::openSerial(filename_, baudrate_))
-    {
+    try {
+        iodrivers_base::Driver::openSerial(filename_, baudrate_);
+    } catch (std::runtime_error& e) {
+	    LOG_ERROR("Could not open connection to port %s with baudrate %d",
+                filename_.c_str(), baudrate_);
         return false;
     }
     mBaudrate = baudrate_;
@@ -47,29 +52,47 @@ bool DynamixelIODriver::open(std::string const& filename_, int baudrate_) {
  *   given to readPacket.
  */
 int DynamixelIODriver::extractPacket(uint8_t const* buffer, size_t buffer_size) const {
-    // find packet marker first
-    // minimum packet size is 6 bytes            
-    if(buffer_size >= 6) 
+
+    for(unsigned int i=0; i<buffer_size; i++) {
+        LOG_DEBUG("Read 0x%x(%d)", buffer[i], buffer[i]);
+    }
+
+    // get at least '0xFF 0xFF ID LENGTH'          
+    if(buffer_size >= 4) 
     {
         int length = dxGetStatusLength(buffer, buffer_size);
+        LOG_DEBUG("status packet length 0x(%d)", length);
         // 0: packet doesnt start at the start of the buffer or packet incomplete
         //<0: invalid checksum
         //>0: length of the packet
         if(length != 0) 
         {
-            if(length < 0)
-                printf("Dynamixel: Invalid checksum detected!\n");
-            return length; //packet in the buffer, returns the packet size
+            if(length < 0) {
+                LOG_ERROR("invalid checksum detected, packet will be discarded");
+                return length; // Discard complete packet.
+            } else {
+                // complete packet available?
+                if(buffer_size >= (unsigned int)length) {
+                    LOG_DEBUG("complete packet available");
+                    return length; //packet in the buffer, returns the packet size
+                } else {
+                    LOG_DEBUG("packet incomplete, need more data");
+                    return 0; // need more data
+                }
+            }
         }
     }
 
+    LOG_DEBUG("buffer size %d", buffer_size);
+
     // find first 0xff 0xff marker
-    unsigned int i=0;
+    int i=0;
     while(i<(buffer_size-1) && 
-                buffer[i] != 0xff && 
-                buffer[i+1] != 0xff )
+                buffer[i] != 0xff)
     {
+        LOG_DEBUG("Ignore byte 0x%x (%d)", buffer[i], buffer[i]);
         i++;
     }
+    LOG_DEBUG("return byte 0x%x (%d)", -i, -i);
     return -i;
 }

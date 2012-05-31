@@ -19,6 +19,9 @@ TARGET_LINK_LIBRARIES(dynamixel ${IO_LIBRARIES})
 ADD_EXECUTABLE(dynamixel_test dynamixel_test.cpp)
 TARGET_LINK_LIBRARIES(dynamixel_test dynamixel)
 
+ADD_EXECUTABLE(main_test main_test.cpp)
+TARGET_LINK_LIBRARIES(main_test dynamixel)
+
 INSTALL(TARGETS dynamixel LIBRARY DESTINATION lib)
 INSTALL(FILES dxseries.h dynamixel.h dynamixel_iodriver.h DESTINATION include)
 

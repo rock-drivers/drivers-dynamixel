@@ -1,7 +1,7 @@
 /**
  * \file dynamixel_iodriver.h
  *  
- * \brief   Inherits from DynamixelIODriver and specialized the serial communication
+ * \brief   Inherits from iodrivers_base::Driver and specialized the serial communication
  *          for the dynamixel servos.
  *
  * \details Implements the virtual function extractPacket(), see for details.          
@@ -17,7 +17,7 @@
 #ifndef DYNAMIXEL_IODRIVER_H_
 #define DYNAMIXEL_IODRIVER_H_
 
-#include <iodrivers_base.hh>
+#include <iodrivers_base/Driver.hpp>
 
 extern "C" {
 #include <dxseries.h>
@@ -27,11 +27,12 @@ extern "C" {
   TypeName(const TypeName&);               \
   void operator=(const TypeName&)
 
+
 /**
  * \class DynamixelIODriver
  * See file description for details.
  */
-class DynamixelIODriver : public IODriver 
+class DynamixelIODriver : public iodrivers_base::Driver
 {
  public:
     DynamixelIODriver();
@@ -62,7 +63,7 @@ class DynamixelIODriver : public IODriver
      */
     inline int readPacket(uint8_t* buffer_, int buffer_size)
     {
-        return IODriver::readPacket(buffer_, buffer_size, mTimeout);
+        return iodrivers_base::Driver::readPacket(buffer_, buffer_size, mTimeout);
     }
     /**
      * Sets the timeout which represents the time in ms to wait for a serial answer.
@@ -76,7 +77,7 @@ class DynamixelIODriver : public IODriver
      */
     inline bool writePacket(uint8_t const* buffer_, int buffer_size)
     {
-        return IODriver::writePacket(buffer_, buffer_size, mTimeout);
+        return iodrivers_base::Driver::writePacket(buffer_, buffer_size, mTimeout);
     }
  protected:
     /**
@@ -88,7 +89,7 @@ class DynamixelIODriver : public IODriver
     int extractPacket(uint8_t const* buffer, size_t buffer_size) const;
 
  private:
-    static const int cMaxPacketSize = 56;//256; ///maximal size of a packet
+    static const int cMaxPacketSize = 255; ///maximal size of a packet
     static const int cDefaultBaudRate = 57600; ///default baud rate
     static const int cDefaultTimeout = 1000; ///default timeout to wait for an answer
 

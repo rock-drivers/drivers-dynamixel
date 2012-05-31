@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "base/logging.h"
+
 /////////////////////////////// PUBLIC ///////////////////////////////////////
 Dynamixel::Dynamixel()
 {
@@ -38,6 +40,9 @@ bool Dynamixel::addServo(DX_UINT8 id_)
         }
     }
     mServoList.push_back(new Servo(id_));
+    if(mServoList.size() == 1) {
+        setServoActive(id_);
+    }
     return true;
 }
 
@@ -251,6 +256,16 @@ Dynamixel::Servo* Dynamixel::setServoActive(DX_UINT8 id_)
     return NULL;
 }
 
+bool Dynamixel::getControlTableEntry(std::string const name, struct ControlTableEntry& entry) {
+    std::map<std::string, struct ControlTableEntry*>::iterator it;
+    it = mMapStringCTEntry.find(name);
+    if(it != mMapStringCTEntry.end()) {
+        entry = *(it->second);
+        return true;
+    }
+    return false;
+}
+
 /////////////////////////////// PRIVATE //////////////////////////////////////
 void Dynamixel::buildControlTable()
 {
@@ -340,9 +355,9 @@ bool Dynamixel::writeCommandReadAnswer(int command_length_bytes)
             return false;
         }
         return true;
-    } catch(unix_error& e_unix) {
+    } catch(iodrivers_base::UnixError& e_unix) {
         cout << "Dynamixel::writeCommandReadAnswer(): Exception occurred: " << e_unix.what() << endl;
-    } catch(timeout_error& e_timeout) {
+    } catch(iodrivers_base::TimeoutError& e_timeout) {
         cout << "Dynamixel::writeCommandReadAnswer(): Exception occurred: " << e_timeout.what() << endl;
     }
     return false;
