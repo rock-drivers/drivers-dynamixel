@@ -321,6 +321,10 @@ bool Dynamixel::writeCommandReadAnswer(int command_length_bytes)
         {
             cout << "Dynamixel::writeCommandReadAnswer(): writePacket error" << endl;
             return false;
+        } else {
+            for(int i=0; i<command_length_bytes; i++) {
+                LOG_DEBUG("Write 0x%x(%d)", mCommandBuffer[i], mCommandBuffer[i]);
+            }
         }
 
         //will we get a status packet? broadcast means no

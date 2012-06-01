@@ -7,7 +7,7 @@
 /////////////////////////////// PUBLIC ///////////////////////////////////////
 DynamixelIODriver::DynamixelIODriver() : iodrivers_base::Driver(cMaxPacketSize)
 {
-    mTimeout = cDefaultTimeout;
+    mTimeout = cDefaultTimeout_ms;
     mBaudrate = -1;
 }
 
@@ -58,10 +58,11 @@ int DynamixelIODriver::extractPacket(uint8_t const* buffer, size_t buffer_size) 
     }
 
     // get at least '0xFF 0xFF ID LENGTH'          
-    if(buffer_size >= 4) 
+    if(buffer_size >= 6) 
     {
         int length = dxGetStatusLength(buffer, buffer_size);
-        LOG_DEBUG("status packet length 0x(%d)", length);
+        LOG_DEBUG("status packet length 0x%x(%d)", length, length);
+
         // 0: packet doesnt start at the start of the buffer or packet incomplete
         //<0: invalid checksum
         //>0: length of the packet
@@ -85,14 +86,20 @@ int DynamixelIODriver::extractPacket(uint8_t const* buffer, size_t buffer_size) 
 
     LOG_DEBUG("buffer size %d", buffer_size);
 
-    // find first 0xff 0xff marker
-    int i=0;
-    while(i<(buffer_size-1) && 
-                buffer[i] != 0xff)
+    // find first 0xff marker
+    // The previous implementation got problems with 0 0xff
+    unsigned int i=0;
+    while(i<buffer_size && buffer[i] != 0xff)
     {
         LOG_DEBUG("Ignore byte 0x%x (%d)", buffer[i], buffer[i]);
         i++;
     }
+    // Remove 0xff as well if the next byte is available and if it is not 0xff.
+    if(i < (buffer_size - 1) && buffer[i+1] != 0xff) {
+        LOG_DEBUG("Ignore byte 0x%x (%d)", buffer[i], buffer[i]);
+        i++;
+    } 
     LOG_DEBUG("return byte 0x%x (%d)", -i, -i);
-    return -i;
+    int ret = (int)i;
+    return -ret;
 }

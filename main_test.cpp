@@ -33,7 +33,7 @@ void printPositionMenu() {
 }
 
 int getRequest(int start, int stop) {
-    int value = 0;
+    int value = -1;
     while(value < start || value > stop) {
         std::cout << "Choose (" << start << " - " << stop << "): ";
         scanf("%d", &value);
@@ -42,7 +42,7 @@ int getRequest(int start, int stop) {
 }
 
 float getRequestf(float start, float stop) {
-    float value = 0;
+    float value = -1;
     while(value < start || value > stop) {
         std::cout << "Choose (" << start << " - " << stop << "): ";
         scanf("%f", &value);
@@ -123,8 +123,6 @@ int main(int argc, char* argv[])
                         break;
                     }
                     case 3: {
-                        std::cout << "Not yet supported" << std::endl;
-                        break;
                         std::cout << "Which control value should be set?" << std::endl;
                         std::string name;
                         std::cin >> name;
@@ -133,6 +131,19 @@ int main(int argc, char* argv[])
                             std::cout << "Control name unknown" << std::endl;
                             break;
                         }
+                        std::cout << "Define new value (" << entry.mBytes << " byte(s))" << std::endl;
+                        uint16_t value = 0;
+                        scanf("%hu",&value);
+                        std::cout << "Set the control " << entry.mName << " to " << value << 
+                                "(0x" << std::hex << value << ")? (yes/no)" <<std::endl;
+                        std::string answer;
+                        std::cin >> answer;
+                        if(answer == "yes") {
+                            if(dynamixel.setControlTableEntry(name, value)) {
+                                std::cout << "Control value has been changed" << std::endl;
+                                break;
+                            }
+                        }   
                         break;
                     }
                     case 4: {

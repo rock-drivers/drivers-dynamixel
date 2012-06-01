@@ -89,9 +89,9 @@ class DynamixelIODriver : public iodrivers_base::Driver
     int extractPacket(uint8_t const* buffer, size_t buffer_size) const;
 
  private:
-    static const int cMaxPacketSize = 255; ///maximal size of a packet
+    static const int cMaxPacketSize = 56; ///maximal size of a packet
     static const int cDefaultBaudRate = 57600; ///default baud rate
-    static const int cDefaultTimeout = 1000; ///default timeout to wait for an answer
+    static const int cDefaultTimeout_ms = 2000; ///default timeout to wait for an answer
 
     int mBaudrate; ///current baudrate, sets in open()
     int mTimeout; ///current timeout
