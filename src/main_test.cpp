@@ -59,8 +59,8 @@ int main(int argc, char* argv[])
 
     if((argc == 2 && strcmp(argv[1], "-h") == 0) || argc < 1 || argc > 4) {
         std::cout << "Dynamixel test program to read and write control values and servo positions" << std::endl;
-        std::cout << "main_test <id> <port> <baudrate>" << std::endl;
-        std::cout << "default: main_test 1 /dev/tty/USB0 57600" << std::endl;
+        std::cout << "dynamixel_control_bin <id> <port> <baudrate>" << std::endl;
+        std::cout << "default: dynamixel_control_bin 1 /dev/tty/USB0 57600" << std::endl;
         return 0;
     }
 
