@@ -29,7 +29,7 @@ bool DynamixelIODriver::open(std::string const& filename_, int baudrate_) {
     try {
         iodrivers_base::Driver::openSerial(filename_, baudrate_);
     } catch (std::runtime_error& e) {
-	    LOG_ERROR("Could not open connection to port %s with baudrate %d",
+	    LOG_ERROR("Could not connect to port %s with baudrate %d",
                 filename_.c_str(), baudrate_);
         return false;
     }

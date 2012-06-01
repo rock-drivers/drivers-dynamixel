@@ -35,11 +35,13 @@ bool Dynamixel::addServo(DX_UINT8 id_)
     {
         if(mServoList[i]->mID == id_)
         {
-            std::cout << "Dynamixel::addServo(): servo " << (int)id_ << " already exists" << std::endl;
+            LOG_WARN("Servo ID %d already added", (int)id_);
             return false;
         }
     }
     mServoList.push_back(new Servo(id_));
+    LOG_INFO("Servo ID %d added", (int)id_);
+
     if(mServoList.size() == 1) {
         setServoActive(id_);
     }
@@ -50,14 +52,14 @@ bool Dynamixel::getControlTableEntry(std::string const item_name, uint16_t * con
 {
     if(mpActiveServo == NULL)
     {
-        std::cout << "Dynamixel::getControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
+        LOG_WARN("No active servo available, use setServoActive() first");
         return false;
     }
 
      struct ControlTableEntry* entry_ = mMapStringCTEntry[item_name];
      if(entry_ == NULL)
      {
-         std::cout << "Dynamixel::getControlTableEntry(): getControlTableEntry: unkown item name" << std::endl;
+         LOG_WARN("Control table entry name %s is unknown", item_name.c_str());
          return false;
      }
 
@@ -79,6 +81,7 @@ bool Dynamixel::getControlTableEntry(std::string const item_name, uint16_t * con
         //update the control table entry of the servo with the ID id_,
         //the array position is listed in the entry object
         mpActiveServo->mControlTableValues[entry_->mNumber] = value_temp;
+        LOG_INFO("Control table entry %s has been changed to %d", item_name.c_str(), value_temp);
         return true;
      }
      return false;
@@ -88,7 +91,7 @@ std::string Dynamixel::getControlTableString()
 {
     if(mpActiveServo == NULL)
     {
-        std::cout << "Dynamixel::getControlTableString(): no active servo, use setServoActive() first" << std::endl;
+        LOG_WARN("No active servo available, use setServoActive() first");
         return "";
     }
     std::stringstream stream;
@@ -122,18 +125,19 @@ bool Dynamixel::getPresentPosition(uint16_t * const pos_)
 {
     if(mpActiveServo == NULL)
     {
-        std::cout << "Dynamixel::getPresentPosition(): no active servo, use setServoActive() first" << std::endl;
-        return "";
+        LOG_WARN("No active servo available, use setServoActive() first");
+        return false;
     }
+
     DX_UINT8 command_length_bytes;
     dxGetReadCommand(mCommandBuffer, &command_length_bytes, mActiveServoID, 36, 2);
     if(writeCommandReadAnswer(command_length_bytes))
     {
-
         int byte_low = mBuffer[5];
         int byte_high = mBuffer[6];
         *pos_ = (byte_low | (byte_high << 8));
         mpActiveServo->mControlTableValues[25] = *pos_;
+        LOG_DEBUG("Current position is %d (steps)", *pos_);
         return true;
     }
     return false;
@@ -145,6 +149,7 @@ bool Dynamixel::getPresentPositionDegree(float * const pos_deg)
     if(getPresentPosition(&pos_step))
     {
         *pos_deg = step2deg(pos_step);
+        LOG_DEBUG("Current position is %f (degree)", *pos_deg);
         return true;
     } else {
         return false;
@@ -160,9 +165,10 @@ bool Dynamixel::readControlTable()
 {
     if(mpActiveServo == NULL)
     {
-        std::cout << "Dynamixel::readControlTable(): no active servo, use setServoActive() first" << std::endl;
-        return "";
+        LOG_WARN("No active servo available, use setServoActive() first");
+        return false;
     }
+
     DX_UINT8 command_length_bytes;
     dxGetReadCompleteCommand(mCommandBuffer, &command_length_bytes, mActiveServoID);
     if( (writeCommandReadAnswer(command_length_bytes)) && (mActiveServoID != DX_BROADCAST) ) //fills the mBuffer, if talking to one specific servo
@@ -182,8 +188,10 @@ bool Dynamixel::readControlTable()
                 ++p_ct;
             }
         }
+        LOG_DEBUG("All controls have been read")
         return true;
     }
+    LOG_ERROR("Controls could not be read");
     return false;
 }
 
@@ -191,15 +199,14 @@ bool Dynamixel::setControlTableEntry(std::string item_name, uint16_t const value
 {
     if(mpActiveServo == NULL)
     {
-        std::cout << "Dynamixel::setControlTableEntry(): no active servo, use setServoActive() first" << std::endl;
+        LOG_WARN("No active servo available, use setServoActive() first");
         return "";
     }
-    std::cout << "Dynamixel::setControlTableEntry(): servo " << (int)mActiveServoID << ": " << item_name << " -> " << value_ << std::endl;
 
     struct ControlTableEntry* entry = mMapStringCTEntry[item_name];
     if(entry == NULL)
     {
-        std::cout << "Dynamixel::setControlTableEntry(): unkown item name" << std::endl;
+        LOG_WARN("Control table entry name %s is unknown", item_name.c_str());
         return false;
     }
 
@@ -213,8 +220,10 @@ bool Dynamixel::setControlTableEntry(std::string item_name, uint16_t const value
     if(writeCommandReadAnswer(command_length_bytes))
     {
         mpActiveServo->mControlTableValues[entry->mNumber] = value_;
+        LOG_INFO("Control table entry %s has been set to %hu", item_name.c_str(), value_);
         return true;
     }
+    LOG_ERROR("Control table entry %s could not be changed to %hu", value_);
     return false;
 }
 
@@ -222,23 +231,26 @@ bool Dynamixel::setGoalPosition(uint16_t const pos_)
 {
     if(mpActiveServo == NULL)
     {
-        std::cout << "Dynamixel::setGoalPosition(): no active servo, use setServoActive() first" << std::endl;
-        return "";
+        LOG_WARN("No active servo available, use setServoActive() first");
+        return false;
     }
 
     DX_UINT8 command_length_bytes;
     dxGetWriteCommand(mCommandBuffer, &command_length_bytes, mActiveServoID, 30, (DX_UINT8*)&pos_, 2);
     if(writeCommandReadAnswer(command_length_bytes))
     {
-       mpActiveServo->mControlTableValues[22] = pos_;
-       return true;
+        mpActiveServo->mControlTableValues[22] = pos_;
+        LOG_DEBUG("Active servo %d set to %hu (steps)", mActiveServoID, pos_);
+        return true;
     }
+    LOG_ERROR("Active servo %d position could not be changed", mActiveServoID);
     return false;
 }
 
 bool Dynamixel::setGoalPositionDegree(float const pos_deg)
 {
     uint16_t pos_step = deg2step(pos_deg);
+    LOG_DEBUG("Active servo %d set to %f (degree)", mActiveServoID, pos_deg);
     return setGoalPosition(pos_step);
 }
 
@@ -250,9 +262,11 @@ Dynamixel::Servo* Dynamixel::setServoActive(DX_UINT8 id_)
         {
             mActiveServoID = id_;
             mpActiveServo = mServoList[i];
+            LOG_INFO("Servo ID %d activated", id_);
             return mServoList[i];
         }
     }
+    LOG_WARN("Servo ID %d is not available and could not be activated", id_);
     return NULL;
 }
 
@@ -263,6 +277,7 @@ bool Dynamixel::getControlTableEntry(std::string const name, struct ControlTable
         entry = *(it->second);
         return true;
     }
+    LOG_WARN("Control table entry %s is unknown", name.c_str());
     return false;
 }
 
@@ -319,7 +334,7 @@ bool Dynamixel::writeCommandReadAnswer(int command_length_bytes)
         DX_UINT8 packet_size = 0;
         if(!mpDynamixelIODriver->writePacket(mCommandBuffer, command_length_bytes))
         {
-            cout << "Dynamixel::writeCommandReadAnswer(): writePacket error" << endl;
+            LOG_ERROR("Packet could not be written");
             return false;
         } else {
             for(int i=0; i<command_length_bytes; i++) {
@@ -330,39 +345,39 @@ bool Dynamixel::writeCommandReadAnswer(int command_length_bytes)
         //will we get a status packet? broadcast means no
         if(mActiveServoID == DX_BROADCAST)
         {
-            cout << "Dynamixel::writeCommandReadAnswer(): Broadcasting, won't recevice status packet as an answer. can't read controlTable" << endl;
+            LOG_DEBUG("Broadcasting ID 0x%x is used, no status packet will be received", DX_BROADCAST);
             return true;
         }
 
         if((packet_size = mpDynamixelIODriver->readPacket(mBuffer, cBufferSize)) <= 0)
         {
-            cout << "Dynamixel::writeCommandReadAnswer(): readPacket error: <= 0 bytes received" << endl;
+            LOG_ERROR("Packet could not be read, %d has been returned", packet_size);
             return false;
         }
         //check status packet
         DX_UINT8 error_flags = dxGetStatusErrorFlags(mBuffer);
         if(error_flags != 0) //error
         {
-            cout << "Dynamixel::writeCommandReadAnswer(): status packet: error flag is set: "<< std::hex << (int)mBuffer[4] << std::dec << endl;
-            if(dxInputVoltageErrorOccurred(mBuffer)){cout << "    Input Voltage Error" << endl;}
-            if(dxAngleLimitErrorOccurred(mBuffer)){cout << "    Angle Limit Error" << endl;}
-            if(dxOverheatingErrorOccurred(mBuffer)){cout << "    Overheating Error" << endl;}
-            if(dxRangeErrorOccurred(mBuffer)){cout << "    Range Error" << endl;}
-            if(dxChecksumErrorOccurred(mBuffer)){cout << "    Checksum Error" << endl;}
-            if(dxOverloadErrorOccurred(mBuffer)){cout << "    Overload Error" << endl;}
-            if(dxInstructionErrorOccurred(mBuffer)){cout << "    Instruction Error" << endl;}
+            LOG_WARN("Status packet error returned (0x%x):", error_flags);
+            if(dxInputVoltageErrorOccurred(mBuffer)){LOG_WARN("    Input Voltage Error");}
+            if(dxAngleLimitErrorOccurred(mBuffer)){LOG_WARN("    Angle Limit Error");}
+            if(dxOverheatingErrorOccurred(mBuffer)){LOG_WARN("    Overheating Error");}
+            if(dxRangeErrorOccurred(mBuffer)){LOG_WARN("    Range Error");}
+            if(dxChecksumErrorOccurred(mBuffer)){LOG_WARN("    Checksum Error");}
+            if(dxOverloadErrorOccurred(mBuffer)){LOG_WARN("    Overload Error");}
+            if(dxInstructionErrorOccurred(mBuffer)){LOG_WARN("    Instruction Error");}
             return false;
         }
         if(!dxIsStatusValid(mBuffer, packet_size))
         {
-            cout << "Dynamixel::writeCommandReadAnswer(): status packet: invalid checksum" << endl;
+            LOG_WARN("Invalid checksum reported");
             return false;
         }
         return true;
-    } catch(iodrivers_base::UnixError& e_unix) {
-        cout << "Dynamixel::writeCommandReadAnswer(): Exception occurred: " << e_unix.what() << endl;
-    } catch(iodrivers_base::TimeoutError& e_timeout) {
-        cout << "Dynamixel::writeCommandReadAnswer(): Exception occurred: " << e_timeout.what() << endl;
+    } catch(iodrivers_base::UnixError& e) {
+        LOG_ERROR("UnixError catched: %s", e.what());
+    } catch(iodrivers_base::TimeoutError& e) {
+        LOG_ERROR("TimeoutError catched: %s", e.what());
     }
     return false;
 }
