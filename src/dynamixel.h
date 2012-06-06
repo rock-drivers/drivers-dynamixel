@@ -24,11 +24,7 @@
 #include <string>
 #include <vector>
 
-#include <dynamixel_iodriver.h>
-
-extern "C" {
-#include <dxseries.h>
-}
+#include "dynamixel_iodriver.h"
 
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
   TypeName(const TypeName&);               \

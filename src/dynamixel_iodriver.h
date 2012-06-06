@@ -20,7 +20,7 @@
 #include <iodrivers_base/Driver.hpp>
 
 extern "C" {
-#include <dxseries.h>
+#include "dxseries.h"
 }
 
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
