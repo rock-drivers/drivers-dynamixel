@@ -184,7 +184,11 @@ class Dynamixel
         mpDynamixelIODriver->setTimeout(timeout_);
     }
 
-    Servo* setServoActive(DX_UINT8 id_);
+    Servo* setServoActive(unsigned char id_);
+
+    inline unsigned char getActiveServo() {
+        return mActiveServoID;
+    }
 
     /**
      * Allows to request a copy of the control table entry.
