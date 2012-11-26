@@ -189,6 +189,10 @@ class Dynamixel
     inline unsigned char getActiveServo() {
         return mActiveServoID;
     }
+    
+    inline void setNumberRetries(unsigned int num){
+        mNumberRetries = num;
+    }
 
     /**
      * Allows to request a copy of the control table entry.
@@ -213,6 +217,13 @@ class Dynamixel
     struct ControlTableEntry mControlTableEntries[cControlTableEntriesNumber]; 
     /** Used in setControlTableEntry and getControlTableEntry. */
     std::map<std::string, struct ControlTableEntry*> mMapStringCTEntry;
+   
+   /** 
+    * Can be used to resend a command if an error occurred.
+    * This is required in our current configuration,  because sometimes
+    * one of the start bytes get lost.
+    */
+   unsigned int mNumberRetries;
     
     //FUNCTIONS    
     void buildControlTable();

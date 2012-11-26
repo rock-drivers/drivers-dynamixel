@@ -88,6 +88,8 @@ int main(int argc, char* argv[])
         std::cout << "Connection (port " << device << ", baudrate " << baud << ") could not be opened" << std::endl;
     }
 
+    dynamixel.setNumberRetries(1);
+
     while(true) {
         switch(dynamixel_menu) {
             case MAIN: {
