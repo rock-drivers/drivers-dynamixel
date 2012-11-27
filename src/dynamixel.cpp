@@ -281,6 +281,14 @@ bool Dynamixel::getControlTableEntry(std::string const name, struct ControlTable
     return false;
 }
 
+std::vector<struct Servo> Dynamixel::getServoListCopy() {
+    std::vector<struct Servo> servo_list_copy;
+    for(unsigned int i=0; i < mServoList.size(); ++i) {
+        servo_list_copy.push_back(*(mServoList.at(i)));
+    }
+    return servo_list_copy;
+}
+
 /////////////////////////////// PRIVATE //////////////////////////////////////
 void Dynamixel::buildControlTable()
 {

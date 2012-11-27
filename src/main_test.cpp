@@ -3,6 +3,8 @@
 #include <string.h>
 
 #include <iostream>
+#include <limits>
+#include <ios>
 
 #include "dynamixel.h"
 
@@ -29,23 +31,34 @@ void printPositionMenu() {
     std::cout << "2. Get position (degree)" << std::endl;
     std::cout << "3. Set position (steps)" << std::endl;
     std::cout << "4. Set position (degree)" << std::endl;
-    std::cout << "5. Back" << std::endl;
+    std::cout << "5. Switch servo off and print positions" << std::endl;
+    std::cout << "6. Back" << std::endl;
 }
 
 int getRequest(int start, int stop) {
     int value = -1;
+    int ret = 0;
     while(value < start || value > stop) {
         std::cout << "Choose (" << start << " - " << stop << "): ";
-        scanf("%d", &value);
+        ret = scanf("%d", &value);
+        if(ret == 0) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
     }
     return value;
 }
 
 float getRequestf(float start, float stop) {
     float value = -1;
+    int ret = 0;
     while(value < start || value > stop) {
         std::cout << "Choose (" << start << " - " << stop << "): ";
-        scanf("%f", &value);
+        ret = scanf("%f", &value);
+        if(ret == 0) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
     }
     return value;
 }
@@ -124,16 +137,26 @@ int main(int argc, char* argv[])
                     }
                     case 3: {
                         std::cout << "Which control value should be set?" << std::endl;
-                        std::string name;
-                        std::cin >> name;
+                        // dont know why, but the buffer has to be cleared.
+                        std::cin.clear();
+                        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                        char name[256];
+                        std::cin.getline(name, 256);
+                        std::string name_str(name);
+
                         Dynamixel::ControlTableEntry entry;
-                        if(!dynamixel.getControlTableEntry(name, entry)) {
-                            std::cout << "Control name unknown" << std::endl;
+                        if(!dynamixel.getControlTableEntry(name_str, entry)) {
+                            std::cout << "Control name unknown:" << name_str << std::endl;
                             break;
                         }
                         std::cout << "Define new value (" << entry.mBytes << " byte(s))" << std::endl;
                         uint16_t value = 0;
-                        scanf("%hu",&value);
+                        int ret = scanf("%hu",&value);
+                        if(ret == 0) {
+                            std::cin.clear();
+                            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                            break;
+                        }
                         std::cout << "Set the control " << entry.mName << " to " << value << 
                                 "(0x" << std::hex << value << ")? (yes/no)" <<std::endl;
                         std::string answer;
@@ -155,7 +178,7 @@ int main(int argc, char* argv[])
             }
             case POSITION: {
                 printPositionMenu();
-                ret = getRequest(1, 5);
+                ret = getRequest(1, 6);
                 switch(ret) {
                     case 1: {
                         uint16_t pos = 0;
@@ -188,6 +211,19 @@ int main(int argc, char* argv[])
                         break;
                     }
                     case 5: {
+                        std::cout << "Interupt with Ctrl+C" << std::endl;
+                        dynamixel.setControlTableEntry("Torque Enable", 0);
+                        float pos = 0;
+                        while(true) {
+                            if(!dynamixel.getPresentPositionDegree(&pos)) {
+                                std::cout << "Position could not be requested" << std::endl;
+                            }
+                            std::cout << "Position is " << pos << " degree." << std::endl;
+                            sleep(1);
+                        }
+                        break;
+                    }
+                    case 6: {
                         dynamixel_menu = MAIN;
                         break;
                     }

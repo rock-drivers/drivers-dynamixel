@@ -153,7 +153,6 @@ class Dynamixel
     /**
      * Sets the control table entry with the name \a item_name to \a value_.
      * If successfull \a mControlTableEntries is updated.
-     * @todo is map a hash map? if not, replace.
      * @warning only works with little endian architectures!         
      */
     bool setControlTableEntry(std::string item_name, uint16_t const value_);
@@ -197,6 +196,11 @@ class Dynamixel
      * \return false if the control name is unknown.
      */
     bool getControlTableEntry(std::string const name, struct ControlTableEntry& entry);
+
+    /**
+     * Returns a copy of the list of all added servos.
+     */
+    std::vector<struct Servo> getServoListCopy();
 
  private:
     //MEMBER VARIABLES
