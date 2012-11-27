@@ -12,6 +12,7 @@ Dynamixel::Dynamixel()
 {
     mActiveServoID = 0;
     mpActiveServo = NULL;
+    mNumberRetries = 0;
     mpDynamixelIODriver = new DynamixelIODriver();
     buildControlTable();
 }
@@ -336,14 +337,13 @@ void Dynamixel::buildControlTable()
 
 bool Dynamixel::writeCommandReadAnswer(int command_length_bytes)
 {
-    using std::cout;
-    using std::endl;
+    for(unsigned int i = 0; i <= mNumberRetries; ++i) {  
     try {
         DX_UINT8 packet_size = 0;
         if(!mpDynamixelIODriver->writePacket(mCommandBuffer, command_length_bytes))
         {
             LOG_ERROR("Packet could not be written");
-            return false;
+            continue;
         } else {
             for(int i=0; i<command_length_bytes; i++) {
                 LOG_DEBUG("Write 0x%x(%d)", mCommandBuffer[i], mCommandBuffer[i]);
@@ -360,7 +360,7 @@ bool Dynamixel::writeCommandReadAnswer(int command_length_bytes)
         if((packet_size = mpDynamixelIODriver->readPacket(mBuffer, cBufferSize)) <= 0)
         {
             LOG_ERROR("Packet could not be read, %d has been returned", packet_size);
-            return false;
+            continue;
         }
         //check status packet
         DX_UINT8 error_flags = dxGetStatusErrorFlags(mBuffer);
@@ -374,12 +374,12 @@ bool Dynamixel::writeCommandReadAnswer(int command_length_bytes)
             if(dxChecksumErrorOccurred(mBuffer)){LOG_WARN("    Checksum Error");}
             if(dxOverloadErrorOccurred(mBuffer)){LOG_WARN("    Overload Error");}
             if(dxInstructionErrorOccurred(mBuffer)){LOG_WARN("    Instruction Error");}
-            return false;
+            continue;
         }
         if(!dxIsStatusValid(mBuffer, packet_size))
         {
             LOG_WARN("Invalid checksum reported");
-            return false;
+            continue;
         }
         return true;
     } catch(iodrivers_base::UnixError& e) {
@@ -387,6 +387,7 @@ bool Dynamixel::writeCommandReadAnswer(int command_length_bytes)
     } catch(iodrivers_base::TimeoutError& e) {
         LOG_ERROR("TimeoutError catched: %s", e.what());
     }
+    } // for loop
     return false;
 }
 
