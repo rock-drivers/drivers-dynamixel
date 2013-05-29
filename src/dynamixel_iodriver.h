@@ -43,7 +43,7 @@ class DynamixelIODriver : public iodrivers_base::Driver
     /**
      * Invokes the close functions of IODriver and closes the serial connection.
      */        
-    bool close();
+    void close();
     /**
      * Returns the variable \a mTimeout, which represents the time in ms to wait 
      * for a serial answer.

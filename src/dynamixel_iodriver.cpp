@@ -19,10 +19,9 @@ DynamixelIODriver::~DynamixelIODriver()
     }
 }
 
-bool DynamixelIODriver::close()
+void DynamixelIODriver::close()
 {
     iodrivers_base::Driver::close();
-    return true;
 }
 
 bool DynamixelIODriver::open(std::string const& filename_, int baudrate_) {
