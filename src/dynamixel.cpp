@@ -224,7 +224,7 @@ bool Dynamixel::setControlTableEntry(std::string item_name, uint16_t const value
         LOG_INFO("Control table entry %s has been set to %hu", item_name.c_str(), value_);
         return true;
     }
-    LOG_ERROR("Control table entry %s could not be changed to %hu", value_);
+    LOG_ERROR("Control table entry %s could not be changed to %hu", item_name.c_str(), value_);
     return false;
 }
 
