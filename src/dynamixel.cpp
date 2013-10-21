@@ -70,7 +70,7 @@ bool Dynamixel::getControlTableEntry(std::string const item_name, uint16_t * con
          mActiveServoID,
          entry_->mAddress,
          entry_->mBytes);
-     if(writeCommandReadAnswer(command_length_bytes))
+     if(writeCommandReadAnswer(command_length_bytes, mpActiveServo->status))
      {
         uint16_t value_temp = mBuffer[5];
         if(entry_->mBytes == 2)
@@ -132,7 +132,7 @@ bool Dynamixel::getPresentPosition(uint16_t * const pos_)
 
     DX_UINT8 command_length_bytes;
     dxGetReadCommand(mCommandBuffer, &command_length_bytes, mActiveServoID, 36, 2);
-    if(writeCommandReadAnswer(command_length_bytes))
+    if(writeCommandReadAnswer(command_length_bytes, mpActiveServo->status ))
     {
         int byte_low = mBuffer[5];
         int byte_high = mBuffer[6];
@@ -172,7 +172,7 @@ bool Dynamixel::readControlTable()
 
     DX_UINT8 command_length_bytes;
     dxGetReadCompleteCommand(mCommandBuffer, &command_length_bytes, mActiveServoID);
-    if( (writeCommandReadAnswer(command_length_bytes)) && (mActiveServoID != DX_BROADCAST) ) //fills the mBuffer, if talking to one specific servo
+    if( (writeCommandReadAnswer(command_length_bytes, mpActiveServo->status)) && (mActiveServoID != DX_BROADCAST) ) //fills the mBuffer, if talking to one specific servo
     {
         struct DxComplete_type mCompleteControlTable;
         dxGetComplete(mBuffer, &mCompleteControlTable);
@@ -218,14 +218,37 @@ bool Dynamixel::setControlTableEntry(std::string item_name, uint16_t const value
         entry->mAddress,
         (DX_UINT8*)&value_,
         entry->mBytes);
-    if(writeCommandReadAnswer(command_length_bytes))
+    if(writeCommandReadAnswer(command_length_bytes, mpActiveServo->status ))
     {
         mpActiveServo->mControlTableValues[entry->mNumber] = value_;
         LOG_INFO("Control table entry %s has been set to %hu", item_name.c_str(), value_);
-        return true;
+
+        return isErrorStatusOk();
     }
     LOG_ERROR("Control table entry %s could not be changed to %hu", item_name.c_str(), value_);
     return false;
+}
+
+servo_dynamixel::ErrorStatus Dynamixel::getErrorStatus()
+{
+    return mpActiveServo->status;
+}
+
+bool Dynamixel::isErrorStatusOk()
+{
+    if(mpActiveServo == NULL)
+    {
+        LOG_ERROR("No active servo available, use setServoActive() first");
+        return false;
+    }
+
+    if( mpActiveServo->status.hasError() )
+    {
+        LOG_ERROR("Dynamixel error status is not ok");
+	return false;
+    }
+
+    return true;
 }
 
 bool Dynamixel::setGoalPosition(uint16_t const pos_)
@@ -238,11 +261,12 @@ bool Dynamixel::setGoalPosition(uint16_t const pos_)
 
     DX_UINT8 command_length_bytes;
     dxGetWriteCommand(mCommandBuffer, &command_length_bytes, mActiveServoID, 30, (DX_UINT8*)&pos_, 2);
-    if(writeCommandReadAnswer(command_length_bytes))
+    if(writeCommandReadAnswer(command_length_bytes, mpActiveServo->status))
     {
         mpActiveServo->mControlTableValues[22] = pos_;
         LOG_DEBUG("Active servo %d set to %hu (steps)", mActiveServoID, pos_);
-        return true;
+
+        return isErrorStatusOk();
     }
     LOG_ERROR("Active servo %d position could not be changed", mActiveServoID);
     return false;
@@ -335,7 +359,7 @@ void Dynamixel::buildControlTable()
     }
 }
 
-bool Dynamixel::writeCommandReadAnswer(int command_length_bytes)
+bool Dynamixel::writeCommandReadAnswer(int command_length_bytes, servo_dynamixel::ErrorStatus &status )
 {
     for(unsigned int i = 0; i <= mNumberRetries; ++i) {  
     try {
@@ -362,20 +386,54 @@ bool Dynamixel::writeCommandReadAnswer(int command_length_bytes)
             LOG_ERROR("Packet could not be read, %d has been returned", packet_size);
             continue;
         }
-        //check status packet
+
+	// check error status values
+	// Note, that unlike the other errors, it is still a valid result when an error
+	// bit is set, since the communication worked. The fact that the servo is in an error
+	// state needs to be handled on another level
         DX_UINT8 error_flags = dxGetStatusErrorFlags(mBuffer);
         if(error_flags != 0) //error
         {
             LOG_WARN("Status packet error returned (0x%x):", error_flags);
-            if(dxInputVoltageErrorOccurred(mBuffer)){LOG_WARN("    Input Voltage Error");}
-            if(dxAngleLimitErrorOccurred(mBuffer)){LOG_WARN("    Angle Limit Error");}
-            if(dxOverheatingErrorOccurred(mBuffer)){LOG_WARN("    Overheating Error");}
-            if(dxRangeErrorOccurred(mBuffer)){LOG_WARN("    Range Error");}
-            if(dxChecksumErrorOccurred(mBuffer)){LOG_WARN("    Checksum Error");}
-            if(dxOverloadErrorOccurred(mBuffer)){LOG_WARN("    Overload Error");}
-            if(dxInstructionErrorOccurred(mBuffer)){LOG_WARN("    Instruction Error");}
-            continue;
+            if(dxInputVoltageErrorOccurred(mBuffer))
+	    {
+		LOG_ERROR("    Input Voltage Error");
+		status.inputVoltageError = true;
+	    }
+            if(dxAngleLimitErrorOccurred(mBuffer))
+	    {
+		LOG_ERROR("    Angle Limit Error");
+		status.angleLimitError = true;
+	    }
+            if(dxOverheatingErrorOccurred(mBuffer))
+	    {
+		LOG_ERROR("    Overheating Error");
+		status.overheatingError = true;
+	    }
+            if(dxRangeErrorOccurred(mBuffer))
+	    {
+		LOG_ERROR("    Range Error");
+		status.rangeError = true;
+	    }
+            if(dxChecksumErrorOccurred(mBuffer))
+	    {
+		LOG_ERROR("    Checksum Error");
+		status.checksumError = true;
+	    }
+            if(dxOverloadErrorOccurred(mBuffer))
+	    {
+		LOG_ERROR("    Overload Error");
+		status.overloadError = true;
+	    }
+            if(dxInstructionErrorOccurred(mBuffer))
+	    {
+		LOG_ERROR("    Instruction Error");
+		status.instructionError = true;
+	    }
         }
+	else
+	    status.clear();
+
         if(!dxIsStatusValid(mBuffer, packet_size))
         {
             LOG_WARN("Invalid checksum reported");

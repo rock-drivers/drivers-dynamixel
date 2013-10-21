@@ -1,6 +1,6 @@
 rock_library(dynamixel
     SOURCES dynamixel.cpp dxseries.c dynamixel_iodriver.cpp
-    HEADERS dxseries.h dynamixel.h dynamixel_iodriver.h
+    HEADERS dxseries.h dynamixel.h dynamixel_iodriver.h dynamixel_types.hpp
     DEPS_PKGCONFIG iodrivers_base 
 )
 

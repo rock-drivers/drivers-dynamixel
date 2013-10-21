@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "dynamixel_iodriver.h"
+#include "dynamixel_types.hpp"
 
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
   TypeName(const TypeName&);               \
@@ -103,6 +104,7 @@ class Dynamixel
             }
         }   
         DX_UINT8 mID;
+	servo_dynamixel::ErrorStatus status;
         uint16_t mControlTableValues[cControlTableEntriesNumber];
     };
     
@@ -165,6 +167,16 @@ class Dynamixel
     bool setGoalPosition(uint16_t const pos_);
 
     bool setGoalPositionDegree(float const pos_deg);
+    
+    /** 
+     * @brief return true if the error status of the dynamixel is ok
+     */
+    bool isErrorStatusOk();
+
+    /**
+     * @return the error status of the active servo
+     */
+    servo_dynamixel::ErrorStatus getErrorStatus();
 
     void clear()
     {
@@ -246,7 +258,7 @@ class Dynamixel
      * \return True if the command could be sent and the received
      *         status packet is error free.
      */
-    bool writeCommandReadAnswer(int command_length_bytes);
+    bool writeCommandReadAnswer(int command_length_bytes, servo_dynamixel::ErrorStatus &status);
 
     DISALLOW_COPY_AND_ASSIGN(Dynamixel);
 };
