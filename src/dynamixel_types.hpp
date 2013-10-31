@@ -106,6 +106,12 @@ struct ServoConfiguration
      * pos_ticks = (pos_rad + positionOffset) * positionScale
      */  
     float positionOffset;
+    /** 
+     * Defines the step resolution of the servo (used to truncate the set positions).
+     * The available steps of the series are: DX = 1024, MX = 4096
+     */  
+    float positionRange;
+    
     /**
      * Speed factor, converting rad/s to dynamixel tick values
      * speed_ticks = speed * speedScale
