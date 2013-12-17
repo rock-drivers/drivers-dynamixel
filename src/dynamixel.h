@@ -104,7 +104,7 @@ class Dynamixel
             }
         }   
         DX_UINT8 mID;
-	servo_dynamixel::ErrorStatus status;
+        servo_dynamixel::ErrorStatus status;
         uint16_t mControlTableValues[cControlTableEntriesNumber];
     };
     
@@ -139,8 +139,6 @@ class Dynamixel
      */
     bool getPresentPosition(uint16_t * const pos_);
 
-    bool getPresentPositionDegree(float * const pos_deg);
-
     /**
      * Uses the struct Configuration to initialise the Dynamixel object.
      */
@@ -165,8 +163,6 @@ class Dynamixel
      * @warning only works with little endian architectures!
      */
     bool setGoalPosition(uint16_t const pos_);
-
-    bool setGoalPositionDegree(float const pos_deg);
     
     /** 
      * @brief return true if the error status of the dynamixel is ok
@@ -243,15 +239,7 @@ class Dynamixel
     
     //FUNCTIONS    
     void buildControlTable();
-    uint16_t deg2step(float deg_)
-    {
-        return (uint16_t)(deg_ * 3.41);
-    }
-    void deleteControlTable();
-    float step2deg(uint16_t step_)
-    {
-        return (float)(step_ * 0.293255132);
-    }
+
     /**
      * First write the command to the \a mCommandBuffer.
      * \param command_length_bytes Length of the command.

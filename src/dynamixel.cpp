@@ -108,14 +108,7 @@ std::string Dynamixel::getControlTableString()
         {
             stream << ' ';
         }
-        stream << mpActiveServo->mControlTableValues[i];
-        //additional output: step to degree conversion
-        if(mControlTableEntries[i].mName == "CW Angle Limit" ||
-             mControlTableEntries[i].mName == "CCW Angle Limit")
-        {
-             stream << " (" << step2deg(mpActiveServo->mControlTableValues[i]) << " deg)";
-        }
-        stream << '\n';
+        stream << mpActiveServo->mControlTableValues[i] << '\n';
     }
     std::string s;
     s = stream.str();
@@ -142,19 +135,6 @@ bool Dynamixel::getPresentPosition(uint16_t * const pos_)
         return true;
     }
     return false;
-}
-
-bool Dynamixel::getPresentPositionDegree(float * const pos_deg)
-{
-    uint16_t pos_step = 0;
-    if(getPresentPosition(&pos_step))
-    {
-        *pos_deg = step2deg(pos_step);
-        LOG_DEBUG("Current position is %f (degree)", *pos_deg);
-        return true;
-    } else {
-        return false;
-    }
 }
 
 bool Dynamixel::init(struct Configuration * const config)
@@ -270,13 +250,6 @@ bool Dynamixel::setGoalPosition(uint16_t const pos_)
     }
     LOG_ERROR("Active servo %d position could not be changed", mActiveServoID);
     return false;
-}
-
-bool Dynamixel::setGoalPositionDegree(float const pos_deg)
-{
-    uint16_t pos_step = deg2step(pos_deg);
-    LOG_DEBUG("Active servo %d set to %f (degree)", mActiveServoID, pos_deg);
-    return setGoalPosition(pos_step);
 }
 
 Dynamixel::Servo* Dynamixel::setServoActive(DX_UINT8 id_)

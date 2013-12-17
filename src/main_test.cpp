@@ -28,11 +28,9 @@ void printConfigurationMenu() {
 void printPositionMenu() {
     std::cout << "Menu GStreamer" << std::endl;
     std::cout << "1. Get position (steps)" << std::endl;
-    std::cout << "2. Get position (degree)" << std::endl;
-    std::cout << "3. Set position (steps)" << std::endl;
-    std::cout << "4. Set position (degree)" << std::endl;
-    std::cout << "5. Switch servo off and print positions" << std::endl;
-    std::cout << "6. Back" << std::endl;
+    std::cout << "2. Set position (steps)" << std::endl;
+    std::cout << "3. Switch servo off and print positions" << std::endl;
+    std::cout << "4. Back" << std::endl;
 }
 
 int getRequest(int start, int stop) {
@@ -66,9 +64,7 @@ float getRequestf(float start, float stop) {
 int main(int argc, char* argv[]) 
 {
     int min_pos_step = 0;
-    int max_pos_step = 0x3ff;    
-    float min_pos_degree = 0.0;
-    float max_pos_degree = 300.0;
+    int max_pos_step = 0xfff;    
 
     if((argc == 2 && strcmp(argv[1], "-h") == 0) || argc < 1 || argc > 4) {
         std::cout << "Dynamixel test program to read and write control values and servo positions" << std::endl;
@@ -192,40 +188,25 @@ int main(int argc, char* argv[])
                         break;
                     }
                     case 2: {
-                        float pos = 0;
-                        if(!dynamixel.getPresentPositionDegree(&pos)) {
-                            std::cout << "Position (degree) could not be requested" << std::endl;
-                        } else {
-                            std::cout << "Position (degree) is " << pos << std::endl;
-                        }
-                        break;
-                    }
-                    case 3: {
                         std::cout << "Define new position (step)" << std::endl;
                         uint16_t pos = getRequest(min_pos_step, max_pos_step);
                         dynamixel.setGoalPosition(pos);
                         break;
                     }
-                    case 4: {
-                        std::cout << "Define new position (degree)" << std::endl;
-                        float pos = getRequestf(min_pos_degree, max_pos_degree);
-                        dynamixel.setGoalPositionDegree(pos);
-                        break;
-                    }
-                    case 5: {
+                    case 3: {
                         std::cout << "Interupt with Ctrl+C" << std::endl;
                         dynamixel.setControlTableEntry("Torque Enable", 0);
-                        float pos = 0;
+                        uint16_t pos = 0;
                         while(true) {
-                            if(!dynamixel.getPresentPositionDegree(&pos)) {
+                            if(!dynamixel.getPresentPosition(&pos)) {
                                 std::cout << "Position could not be requested" << std::endl;
                             }
-                            std::cout << "Position is " << pos << " degree." << std::endl;
+                            std::cout << "Position is " << pos << " (steps)" << std::endl;
                             sleep(1);
                         }
                         break;
                     }
-                    case 6: {
+                    case 4: {
                         dynamixel_menu = MAIN;
                         break;
                     }
