@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
             }
             case POSITION: {
                 printPositionMenu();
-                ret = getRequest(1, 6);
+                ret = getRequest(1, 4);
                 switch(ret) {
                     case 1: {
                         uint16_t pos = 0;
