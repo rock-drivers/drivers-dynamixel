@@ -53,11 +53,10 @@ class DynamixelIODriver : public iodrivers_base::Driver
         return mTimeout;
     }
     /**
-     * Invokes the open functions of IODrivers.
-     * \param filename_ Serial device like \a /dev/ttyUSB0.
-     * \param baudrate_ Baudrate, default is 57600.
+     * Invokes the open functions of IODrivers, using the URI to select the device.
+     * \param uri_ device URI like \a serial://path/to/device:baudrate or tcp://hostname:port.
      */
-    bool open(std::string const& filename_, int baudrate_ = cDefaultBaudRate);
+    bool open(std::string const& uri_);
     /**
      * Invokes the function readPacket of IODriver with the timeout \a mTimeout.
      */
