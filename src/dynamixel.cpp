@@ -139,7 +139,7 @@ bool Dynamixel::getPresentPosition(uint16_t * const pos_)
 
 bool Dynamixel::init(struct Configuration * const config)
 {
-    return mpDynamixelIODriver->open(config->mFilename, config->mBaudrate);
+    return mpDynamixelIODriver->open(config->mFilename);
 }
 
 bool Dynamixel::readControlTable()

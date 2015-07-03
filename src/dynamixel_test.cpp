@@ -109,7 +109,7 @@ int main (int argc, char** argv){
 					perror("errno is");
 					return DYNAMIXEL_NO_INIT;
 				}
-
+/*
 				if(!dynamixel_.readControlTable())
 				{
 					std::cerr << "readControlTable" << std::endl;
@@ -124,7 +124,7 @@ int main (int argc, char** argv){
 					std::cout << "I have to set Status Return Level to \"always respond\", so I can work with this servo like i'm supposed to do" << std::endl;
 					dynamixel_.setControlTableEntry("Status Return Level", 2);
 				}
-
+*/
 				connected = true;
 
                break;

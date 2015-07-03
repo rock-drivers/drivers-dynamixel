@@ -24,15 +24,14 @@ void DynamixelIODriver::close()
     iodrivers_base::Driver::close();
 }
 
-bool DynamixelIODriver::open(std::string const& filename_, int baudrate_) {
+bool DynamixelIODriver::open(std::string const& uri_) {
     try {
-        iodrivers_base::Driver::openSerial(filename_, baudrate_);
+        iodrivers_base::Driver::openURI(uri_);
     } catch (std::runtime_error& e) {
-	    LOG_ERROR("Could not connect to port %s with baudrate %d",
-                filename_.c_str(), baudrate_);
+	    LOG_ERROR("Could not connect to URI %s",
+                uri_.c_str());
         return false;
     }
-    mBaudrate = baudrate_;
     return true;
 }
 
