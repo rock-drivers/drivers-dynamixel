@@ -13,7 +13,7 @@
 
 /**
  * Requests and prints the control table and (optional) moves the servo to the passed position.\n
- * Usage: ./dynamixel_test -port /dev/ttyUSB0 -id 1 -baud 115200 -connect -p 200 -w 100 -p 850 \n
+ * Usage: ./dynamixel_test -uri serial:///dev/ttyUSB0:57600 -id 1 -connect -p 200 -w 100 -p 850 \n
  * \return 0 if success, 1 if the servo could not be initialized, 2 if the control table \n
  * could not be read and 3 some ControlTable Vlaues could not be written
  */
@@ -22,10 +22,8 @@ int main (int argc, char** argv){
 
 	// sensible default-values
     int id = 1;
-    int baud = 57600;
-    std::string portname("/dev/ttyUSB0");
+    std::string portname("serial:///dev/ttyUSB0:57600");
     Dynamixel dynamixel_;
-    struct Dynamixel::Configuration dynamixel_config;
 	int idx = 0;
 	uint16_t retVal;
 	bool connected = false;
@@ -41,8 +39,7 @@ int main (int argc, char** argv){
                /* These options set a flag. */
                {"help",      no_argument, 0, '?'},
                {"id",        required_argument, 0, 'i'},
-               {"baud",      required_argument, 0, 'b'},
-               {"port",      required_argument, 0, 'o'},
+               {"uri",      required_argument, 0, 'o'},
                {"connect",   no_argument,       0, 'c'},
                {"CW_angle",  required_argument, 0, 'a'},
                {"CCW_angle", required_argument, 0, 'A'},
@@ -85,25 +82,18 @@ int main (int argc, char** argv){
 				std::cout << "will talk to servo with id " << id << std::endl;
                break;
 
-             case 'b':
-				baud = atoi(optarg);
-				std::cout << "will use baudrate of " << baud << std::endl;
-               break;
              case 'o':
 				portname = optarg;
 				std::cout << "will use serial port " << portname << std::endl;
                break;
              case 'c':
-				std::cout << "Connecting to servo with id " << id << " on device " << portname << " and baudrate " << baud << std::endl;
+				std::cout << "Connecting to servo with id " << id << " on device " << portname << std::endl;
 
 				dynamixel_.addServo(id);
 				dynamixel_.setServoActive(id);
-
-				dynamixel_config.mFilename = portname.c_str();
-				dynamixel_config.mBaudrate = baud;
 				dynamixel_.setTimeout(100);
 
-				if(!dynamixel_.init(&dynamixel_config))
+				if(!dynamixel_.init(portname))
 				{
 					std::cerr << "cannot open device." << std::endl;
 					perror("errno is");

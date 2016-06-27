@@ -8,7 +8,6 @@
 DynamixelIODriver::DynamixelIODriver() : iodrivers_base::Driver(cMaxPacketSize)
 {
     mTimeout = cDefaultTimeout_ms;
-    mBaudrate = -1;
 }
 
 DynamixelIODriver::~DynamixelIODriver()
