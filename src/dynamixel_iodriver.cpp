@@ -2,7 +2,7 @@
 
 #include "dynamixel_iodriver.h"
 
-#include "base/logging.h"
+#include <base-logging/Logging.hpp>
 
 /////////////////////////////// PUBLIC ///////////////////////////////////////
 DynamixelIODriver::DynamixelIODriver() : iodrivers_base::Driver(cMaxPacketSize)

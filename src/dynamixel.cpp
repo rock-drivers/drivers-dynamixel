@@ -5,7 +5,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "base/logging.h"
+#include <base-logging/Logging.hpp>
 
 /////////////////////////////// PUBLIC ///////////////////////////////////////
 Dynamixel::Dynamixel()
