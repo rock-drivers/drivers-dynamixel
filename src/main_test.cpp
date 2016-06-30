@@ -66,21 +66,19 @@ int main(int argc, char* argv[])
     int min_pos_step = 0;
     int max_pos_step = 0xfff;    
 
-    if((argc == 2 && strcmp(argv[1], "-h") == 0) || argc < 1 || argc > 4) {
+    if((argc == 2 && strcmp(argv[1], "-h") == 0) || argc < 1 || argc > 3) {
         std::cout << "Dynamixel test program to read and write control values and servo positions" << std::endl;
-        std::cout << "dynamixel_control_bin <id> <port> <baudrate>" << std::endl;
-        std::cout << "default: dynamixel_control_bin 1 /dev/tty/USB0 57600" << std::endl;
+        std::cout << "dynamixel_control_bin <id> <uri>" << std::endl;
+        std::cout << "default: dynamixel_control_bin 1 serial:///dev/tty/USB0:57600" << std::endl;
         return 0;
     }
 
     int id = 1;
-    std::string device = "/dev/ttyUSB0";
-    int baud = 57600;
+    std::string device = "serial:///dev/ttyUSB0:57600";
 
-    if(argc == 4) {
+    if(argc == 3) {
         id = atoi(argv[1]);
         device = argv[2];
-        baud = atoi(argv[3]);
     }
 
     int ret = 0;
@@ -88,13 +86,12 @@ int main(int argc, char* argv[])
     DynamixelMenu dynamixel_menu = MAIN;
 
     Dynamixel dynamixel;
-    Dynamixel::Configuration conf(device, baud);
 
     if(!dynamixel.addServo(id)) {
         std::cout << "Servo " << id << "could not be added" << std::endl;
     }
-    if(!dynamixel.init(&conf)) {
-        std::cout << "Connection (port " << device << ", baudrate " << baud << ") could not be opened" << std::endl;
+    if(!dynamixel.init(device)) {
+        std::cout << "Connection (uri " << device << ") could not be opened" << std::endl;
     }
 
     dynamixel.setNumberRetries(1);

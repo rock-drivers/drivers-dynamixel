@@ -43,26 +43,6 @@ class Dynamixel
     static int const cControlTableEntriesNumber = 34;
 
     /**
-     * \struct Configuration
-     * Used in init() to configure the serial port.
-     */
-    struct Configuration
-    {
-        Configuration()
-        {
-            mFilename = "";
-            mBaudrate = 57600;
-        }
-        Configuration(std::string filename_, int baudrate_)
-        {
-            mFilename = filename_;
-            mBaudrate = baudrate_;
-        }
-        std::string mFilename;
-        int mBaudrate;
-    };
-
-    /**
      * \struct ControlTableEntry
      * Every control table entry of the dynamixel is represented by a object of this struct.
      * It contains the address, the name, the number of bytes (one or two) and the current value
@@ -140,9 +120,9 @@ class Dynamixel
     bool getPresentPosition(uint16_t * const pos_);
 
     /**
-     * Uses the struct Configuration to initialise the Dynamixel object.
+     * Initialise the Dynamixel object.
      */
-    bool init(struct Configuration * const config);
+    bool init(std::string const & uri);
 
     /**
      * Reads the complete control table and updates the array \a mControlTableEntries.

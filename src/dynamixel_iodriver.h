@@ -92,7 +92,6 @@ class DynamixelIODriver : public iodrivers_base::Driver
     static const int cDefaultBaudRate = 57600; ///default baud rate
     static const int cDefaultTimeout_ms = 2000; ///default timeout to wait for an answer
 
-    int mBaudrate; ///current baudrate, sets in open()
     int mTimeout; ///current timeout
 
     DISALLOW_COPY_AND_ASSIGN(DynamixelIODriver);
