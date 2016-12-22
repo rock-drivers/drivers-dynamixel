@@ -7,6 +7,9 @@
 
 namespace servo_dynamixel {
 
+    
+#define PI 3.141592653589793
+    
 /** 
  * @brief error status of the dynamixel servo
  *
@@ -46,8 +49,55 @@ struct ErrorStatus
     }
 };
 
+enum DYNAMIXEL_TYPE {
+    DYN_DX_116,
+    DYN_MX_28,
+};
+
+/**
+ * This structure is not used by this driver but by the Rock module servo_dynamixel.
+ * It contains examples (see setScales()) how the scales have to be defined.
+ */
 struct ServoConfiguration
 {
+    ServoConfiguration() : 
+            name("Undefined"), 
+            id(1), 
+            cwComplianceMargin(0),
+            ccwComplianceMargin(0),
+            cwComplianceSlope(0x20),
+            ccwComplianceSlope(0x00),
+            punch(0),
+            positionScale(0.0),
+            positionOffset(0.0),
+            positionRange(0.0),
+            speedScale(0.0), 
+            effortScale(0.0), 
+            reverse(false) {
+     }
+    
+    /**
+     * \param name Name of the servo.
+     * \param id ID of the servo, by default 1.
+     * \param type Used to set correct values for range, offset and scales.
+     */
+    ServoConfiguration(std::string name, int id, enum DYNAMIXEL_TYPE type) : 
+            name(name), 
+            id(id), 
+            cwComplianceMargin(0), 
+            ccwComplianceMargin(0), 
+            cwComplianceSlope(0x20), 
+            ccwComplianceSlope(0x00), 
+            punch(0), 
+            positionScale(0.0),
+            positionOffset(0.0), 
+            positionRange(0.0),
+            speedScale(0.0), 
+            effortScale(0.0),
+            reverse(false) {
+        setScales(type);
+     }
+    
     /** name of the servo, used to identify with the actuators name */
     std::string name;
 
@@ -84,13 +134,13 @@ struct ServoConfiguration
     //   D = cwComplianceSlope
     //   E = punch
 
-    /** clockwise compliance margin */
+    /** clockwise compliance margin, D Gain */
     uint8_t cwComplianceMargin;    
-    /** counterclockwise compliance margin */
+    /** counterclockwise compliance margin, I Gain */
     uint8_t ccwComplianceMargin;
-    /** clockwise compliance slope */
+    /** clockwise compliance slope, P Gain Byte 1*/
     uint8_t cwComplianceSlope;  
-    /** counterclockwise compliance slope */
+    /** counterclockwise compliance slope, P Gain Byte 2 */
     uint8_t ccwComplianceSlope; 
 
     /** minimum current being supplied to the motor during action */
@@ -104,6 +154,7 @@ struct ServoConfiguration
     /** 
      * Offset which is used for interpreting the input position angle values
      * pos_ticks = (pos_rad + positionOffset) * positionScale
+     * Defines the rotation center in rad.
      */  
     float positionOffset;
     /** 
@@ -122,6 +173,13 @@ struct ServoConfiguration
      * load_ticks = effort * effortScale 
      */
     float effortScale;
+    
+    /**
+     * Inverts the direction of rotation. Instead of step s 
+     * positionRange - s is used. This can be used e.g. if two
+     * servos looking in opposite directions should move sth. together.
+     */
+    bool reverse;
 
     void checkValid() const
     {
@@ -132,9 +190,45 @@ struct ServoConfiguration
 	in_range( ccwComplianceMargin, 0, 254 );
 	in_range( cwComplianceSlope, 0, 254 );
 	in_range( ccwComplianceSlope, 0, 254 );
-	in_range( punch, 32, 1023 );
+	in_range( punch, 0, 1023 );
 
 #undef in_range
+    }
+    
+    /**
+     * Contains the predefined scales and position ranges
+     * for some dynamixels.
+     */
+    void setScales(enum DYNAMIXEL_TYPE type) {
+        switch(type) {
+            case DYN_DX_116: {
+                // Sets the rotation center in rad.
+                positionOffset = (300/180)*PI/2.0;
+                // 0° to 300° with 1024 steps.
+                positionRange = 1023;
+                // Calculates steps per rad.
+                positionScale = positionRange/((300/180)*PI);
+                // Converts rad/sec to DX speed value: 0~1023 (0X3FF). 1023 is 70 rpm.
+                speedScale = ((60/(2*PI)) / 70) * 1023;
+                // 2.5Nm with 12V
+                effortScale = 1023/2.5;
+                break;
+            }
+            case DYN_MX_28: {
+                // Sets the rotation center in rad.
+                positionOffset = ((360/180)*PI)/2.0;
+                // 0° to 360° with 4096 steps.
+                positionRange = 4095;
+                // Calculates steps per rad.
+                positionScale = positionRange/((360/180)*PI);
+                // Converts rad/sec to MX speed value: 0~1023 (0X3FF) with 0.114rpm per step. 
+                // 0 is maximum. 1023 is 117.07 rpm.
+                speedScale = ((60/(2*PI)) / 117.07) * 1023;
+                // 2.06Nm with 12V
+                effortScale = 1023/2.06;
+                break;
+            }
+        }
     }
 };
 
