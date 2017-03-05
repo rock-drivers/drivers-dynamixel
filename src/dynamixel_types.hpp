@@ -175,9 +175,10 @@ struct ServoConfiguration
     float effortScale;
     
     /**
-     * Inverts the direction of rotation. Instead of step s 
+     * Inverts the direction of rotation. Instead of step s ->
      * positionRange - s is used. This can be used e.g. if two
-     * servos looking in opposite directions should move sth. together.
+     * servos looking in opposite directions but should move sth. together.
+     * This adapts the limits of the servo as well.
      */
     bool reverse;
 
